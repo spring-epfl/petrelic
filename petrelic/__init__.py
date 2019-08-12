@@ -1,0 +1,8 @@
+__version__ = "0.0.0"
+__title__ = "petrelic"
+__author__ = "Wouter Lueks"
+__email__ = "wouter.lueks@epfl.ch"
+__url__ = "https://github.com/spring-epfl/petrelic"
+__license__ = "Apache 2.0"
+__description__ = "A Python binding for the RELIC cryptographic library"
+__copyright__ = "EPFL, Spring Lab, 2019"
