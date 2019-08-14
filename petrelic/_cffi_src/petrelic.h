@@ -1,16 +1,17 @@
 int core_init(void);
 int core_clean(void);
-int pc_param_set_any();
-void pc_param_print();
-
-
 unsigned int get_rlc_dig(void);
 int get_rlc_ok(void);
+
 const int CONST_RLC_POS;
 const int CONST_RLC_NEG;
 const int CONST_RLC_LT;
 const int CONST_RLC_EQ;
+const int CONST_RLC_NE;
 const int CONST_RLC_GT;
+const int CONST_RLC_DIG;
+const int CONST_RLC_OK;
+
 
 
 typedef uint64_t dig_t;
@@ -29,8 +30,6 @@ typedef struct {
 } bn_st;
 
 typedef bn_st bn_t[1];
-void g1_get_ord(bn_t order);
-
 
 void bn_new(bn_t a);
 void bn_copy(bn_t c, const bn_t a);
@@ -121,7 +120,47 @@ typedef ep_st g1_st;
 // typedef fp12_st gt_st;
 
 
-/* void g1_null(g1_t p) */
+void g1_null(g1_t p);
 void g1_new(g1_t p);
+void g1_get_gen(g1_t p);
+void g1_get_ord(bn_t order);
+int g1_is_infty(g1_t p);
+void g1_set_infty(g1_t p);
+void g1_copy(g1_t r, g1_t p);
+int g1_cmp(g1_t p, g1_t q);
 void g1_rand(g1_t p);
 void g1_print(g1_t p);
+
+int g1_size_bin(g1_t p, int pack);
+void g1_read_bin(g1_t p, const uint8_t *bin, int len);
+void g1_write_bin(uint8_t *bin, int len, g1_t p, int pack);
+
+void g1_neg(g1_t r, g1_t p);
+void g1_add(g1_t r, g1_t p, g1_t q);
+void g1_sub(g1_t r, g1_t p, g1_t q);
+void g1_dbl(g1_t r, g1_t p);
+void g1_norm(g1_t r, g1_t p);
+void g1_mul(g1_t r, g1_t p, bn_t k);
+void g1_mul_key(g1_t r, g1_t p, bn_t k);
+void g1_mul_dig(g1_t r, g1_t p, dig_t k);
+void g1_mul_gen(g1_t r, bn_t k);
+int g1_is_valid(g1_t p);
+
+void g1_mul_sim(g1_t r, const g1_t p, const bn_t k, const g1_t q, const bn_t m);
+void g1_map(g1_t p, const uint8_t *bin, int len);
+
+/*
+  // Skipping precomputation table for now
+  void g1_mul_pre(g1_t *t, const g1_t p);
+  void g1_mul_fix(g1_t r, const g1_t *t, const bn_t k);
+
+
+  void gt_set_unity(gt_t p);
+*/
+
+int pc_param_set_any();
+void pc_param_print();
+
+
+void fp_prime_back(bn_t c, const fp_t a);
+

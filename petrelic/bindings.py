@@ -15,8 +15,12 @@ class RelicInitializer:
 
     def __initialize_relic(self):
         print("Initializing RELIC")
+
         if _C.core_init() != RLC_OK:
-            raise RuntimeError("Could not initialize RELIC")
+            raise RuntimeError("Could not initialize RELIC core")
+
+        if _C.pc_param_set_any() != RLC_OK:
+            raise RuntimeError("Could not setup pairing curve")
 
 # Initializing RELIC
 RelicInitializer()
