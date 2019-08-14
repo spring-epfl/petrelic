@@ -5,6 +5,7 @@ _C = lib
 
 RLC_OK = _C.get_rlc_ok()
 
+
 class RelicInitializer:
     initialized = False
 
@@ -22,7 +23,6 @@ class RelicInitializer:
         if _C.pc_param_set_any() != RLC_OK:
             raise RuntimeError("Could not setup pairing curve")
 
+
 # Initializing RELIC
 RelicInitializer()
-
-

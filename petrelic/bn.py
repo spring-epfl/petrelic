@@ -4,6 +4,7 @@ import petrelic.constants as consts
 import functools
 import re
 
+
 def force_Bn(n):
     """A decorator that coerces the nth input to be a Big Number"""
 
@@ -19,11 +20,14 @@ def force_Bn(n):
                     new_args = tuple(new_args)
                 else:
                     # Don't know how to convert
-                    return NotImplemented;
+                    return NotImplemented
 
             return func(*new_args, **kwargs)
+
         return wrapper
+
     return decorator_force_Bn
+
 
 def force_Bn_other(func):
     return force_Bn(1)(func)
@@ -46,7 +50,7 @@ class Bn(object):
     @staticmethod
     def _from_radix_string(sinput, radix):
         neg = False
-        if sinput[0] == '-':
+        if sinput[0] == "-":
             neg = True
             sinput = sinput[1:]
 
@@ -58,7 +62,6 @@ class Bn(object):
             return ret.__neg__()
         else:
             return ret
-
 
     @staticmethod
     def from_decimal(sdec):
@@ -80,7 +83,6 @@ class Bn(object):
             raise Exception("String must only contain digits 0--9 and sign")
 
         return Bn._from_radix_string(sdec, 10)
-
 
     @staticmethod
     def from_hex(shex):
@@ -214,13 +216,12 @@ class Bn(object):
         # 'Turn into boolean'
         return not bool(_C.bn_is_zero(self.bn))
 
-
     def repr(self):
         return self.__repr__()
 
     def __repr__(self):
         # TODO: return value may be too big, in which case it cannot be recovered
-        return 'Bn({})'.format(self.repr_in_base(10))
+        return "Bn({})".format(self.repr_in_base(10))
 
     def __str__(self):
         return self.repr_in_base(10)
@@ -571,7 +572,9 @@ class Bn(object):
     @force_Bn_other
     def __pow__(self, n, modulo=None):
         if n < 0 and modulo is None:
-            raise ArithmeticError("Negative exponent only supported when modulus is set")
+            raise ArithmeticError(
+                "Negative exponent only supported when modulus is set"
+            )
 
         # TODO: fix coercions later
         if type(modulo) == int:
@@ -605,7 +608,6 @@ class Bn(object):
                 base = base.mod_mul(base, modulo)
                 _C.bn_hlv(n.bn, n.bn)
             return res
-
 
     def is_prime(self):
         """Returns True if the number is prime, with negligible prob. of error.
@@ -661,9 +663,5 @@ class Bn(object):
         """Returns the number of bits representing this Big Number"""
         return int(_C.bn_bits(self.bn))
 
-
     def __hash__(self):
         return int(self).__hash__()
-
-
-

@@ -3,6 +3,7 @@ from petrelic.bn import Bn
 import pytest
 from copy import copy, deepcopy
 
+
 def test_bn_constructors():
     assert Bn.from_decimal("100") == 100
     assert Bn.from_decimal("-100") == -100
@@ -18,18 +19,18 @@ def test_bn_constructors():
 
     with pytest.raises(Exception) as excinfo:
         Bn(-100).binary()
-    assert 'negative' in str(excinfo.value)
+    assert "negative" in str(excinfo.value)
 
-    #assert Bn.from_binary(Bn(-100).binary()) == 100
+    # assert Bn.from_binary(Bn(-100).binary()) == 100
     assert Bn.from_binary(Bn(100).binary()) == Bn(100)
     assert Bn.from_binary(Bn(100).binary()) == 100
 
     with pytest.raises(Exception) as excinfo:
-        s = 2**65
+        s = 2 ** 65
         Bn(s)
-    assert 'does not fit' in str(excinfo.value)
+    assert "does not fit" in str(excinfo.value)
 
-    #assert Bn.from_binary(Bn(-100).binary()) != Bn(50)
+    # assert Bn.from_binary(Bn(-100).binary()) != Bn(50)
     assert int(Bn(-100)) == -100
 
     assert repr(Bn(5)) == Bn(5).repr()
@@ -49,24 +50,24 @@ def test_bn_prime():
 
 
 def test_bn_arithmetic():
-    assert (Bn(1) + Bn(1) == Bn(2))
-    assert (Bn(1).int_add(Bn(1)) == Bn(2))
+    assert Bn(1) + Bn(1) == Bn(2)
+    assert Bn(1).int_add(Bn(1)) == Bn(2)
 
-    assert (Bn(1) + 1 == Bn(2))
+    assert Bn(1) + 1 == Bn(2)
     # assert (1 + Bn(1) == Bn(2))
 
-    assert (Bn(1) + Bn(-1) == Bn(0))
-    assert (Bn(10) + Bn(10) == Bn(20))
-    assert (Bn(-1) * Bn(-1) == Bn(1))
-    assert (Bn(-1).int_mul(Bn(-1)) == Bn(1))
+    assert Bn(1) + Bn(-1) == Bn(0)
+    assert Bn(10) + Bn(10) == Bn(20)
+    assert Bn(-1) * Bn(-1) == Bn(1)
+    assert Bn(-1).int_mul(Bn(-1)) == Bn(1)
 
-    assert (Bn(10) * Bn(10) == Bn(100))
-    assert (Bn(10) - Bn(10) == Bn(0))
-    assert (Bn(10) - Bn(100) == Bn(-90))
-    assert (Bn(10) + (-Bn(10)) == Bn(0))
+    assert Bn(10) * Bn(10) == Bn(100)
+    assert Bn(10) - Bn(10) == Bn(0)
+    assert Bn(10) - Bn(100) == Bn(-90)
+    assert Bn(10) + (-Bn(10)) == Bn(0)
     s = -Bn(100)
-    assert (Bn(10) + s == Bn(-90))
-    assert (Bn(10) - (-Bn(10)) == Bn(20))
+    assert Bn(10) + s == Bn(-90)
+    assert Bn(10) - (-Bn(10)) == Bn(20)
     assert -Bn(-10) == 10
     assert Bn(-10).int_neg() == 10
 
@@ -91,17 +92,17 @@ def test_bn_arithmetic():
     with pytest.raises(Exception) as excinfo:
         Bn(3).mod_inverse(0)
         print("Got inverse")
-    assert 'No inverse' in str(excinfo.value)
+    assert "No inverse" in str(excinfo.value)
 
     with pytest.raises(Exception) as excinfo:
         x = Bn(0).mod_inverse(Bn(13))
         print("!!! Got inverse", x)
-    assert 'No inverse' in str(excinfo.value)
+    assert "No inverse" in str(excinfo.value)
 
     # with pytest.raises(Exception) as excinfo:
     #    x = Bn(0).mod_inverse(Bn(13))
     #    print("Got inverse", x)
-    #assert 'No inverse' in str(excinfo.value)
+    # assert 'No inverse' in str(excinfo.value)
 
     assert Bn(10).mod_add(10, 15) == (10 + 10) % 15
     assert Bn(10).mod_sub(100, 15) == (10 - 100) % 15
@@ -110,17 +111,17 @@ def test_bn_arithmetic():
 
 
 def test_bn_right_arithmetic():
-    assert (1 + Bn(1) == Bn(2))
+    assert 1 + Bn(1) == Bn(2)
 
-    assert (-1 * Bn(-1) == Bn(1))
+    assert -1 * Bn(-1) == Bn(1)
 
-    assert (10 * Bn(10) == Bn(100))
-    assert (10 - Bn(10) == Bn(0))
-    assert (10 - Bn(100) == Bn(-90))
-    assert (10 + (-Bn(10)) == Bn(0))
+    assert 10 * Bn(10) == Bn(100)
+    assert 10 - Bn(10) == Bn(0)
+    assert 10 - Bn(100) == Bn(-90)
+    assert 10 + (-Bn(10)) == Bn(0)
     s = -Bn(100)
-    assert (10 + s == Bn(-90))
-    assert (10 - (-Bn(10)) == Bn(20))
+    assert 10 + s == Bn(-90)
+    assert 10 - (-Bn(10)) == Bn(20)
 
     assert divmod(10, Bn(3)) == (Bn(3), Bn(1))
 

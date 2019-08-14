@@ -8,6 +8,7 @@ Example:
     True
 """
 
+
 class BilinearGroupPair:
     """
     A bilinear group pair.
@@ -28,8 +29,7 @@ class BilinearGroupPair:
         return self.G1, self.G2, self.GT
 
 
-
-class G1Group():
+class G1Group:
     def __init__(self):
         pass
 
@@ -62,7 +62,7 @@ class G1Group():
         """
 
         ord = Bn()
-        _C.g1_get_ord(ord.bn);
+        _C.g1_get_ord(ord.bn)
         return ord
 
     def check_point(self, pt):
@@ -104,7 +104,7 @@ class G1Group():
     # Not implemented: list_curves(), parameters(), get_points_from_x
 
 
-class G1Elem():
+class G1Elem:
 
     __slots__ = ["pt"]
 
@@ -187,7 +187,7 @@ class G1Elem():
         return res
 
     def pt_double_inplace(self):
-        _C.g1_dbl(self.pt, self.pt);
+        _C.g1_dbl(self.pt, self.pt)
         return self
 
     def pt_neg(self):
@@ -342,12 +342,14 @@ class G1Elem():
 def G2Group():
     pass
 
+
 def G2Elem():
     pass
+
 
 def GTGroup():
     pass
 
+
 def GTElem():
     pass
-
