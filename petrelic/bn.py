@@ -19,7 +19,7 @@ def force_Bn(n):
                     new_args = tuple(new_args)
                 else:
                     # Don't know how to convert
-                    raise TypeError("Cannot convert argument ", n);
+                    return NotImplemented;
 
             return func(*new_args, **kwargs)
         return wrapper
