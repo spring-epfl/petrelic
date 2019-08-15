@@ -4,12 +4,6 @@ import petrelic.constants as consts
 
 from binascii import hexlify
 
-"""
-Example:
-    >>> 1 == 2
-    True
-"""
-
 
 class BilinearGroupPair:
     """
@@ -625,8 +619,295 @@ class G2Elem:
 
 
 class GTGroup:
-    pass
+    def __init__(self):
+        pass
+
+    def generator(self):
+        """Returns the generator of the group."""
+
+        pt = GTElem()
+        _C.gt_get_gen(pt.pt)
+        return pt
+
+    def unity(self):
+        """Returns the unity element
+
+        Example:
+            >>> G = GTGroup()
+            >>> G.generator() * G.unity() == G.generator() ## Should hold.
+            True
+        """
+        pt = GTElem()
+        _C.gt_set_unity(pt.pt)
+        return pt
+
+    def order(self):
+        """Returns the order of the group as a Big Number.
+
+        Example:
+            >>> G = GTGroup()
+            >>> G.generator() ** G.order() == G.unity() ## Should hold.
+            True
+        """
+
+        ord = Bn()
+        _C.gt_get_ord(ord.bn)
+        return ord
+
+    # TODO: was check_point
+    def check_elem(self, pt):
+        """Ensures the element is an element of the group
+
+        Example:
+            >>> G = GTGroup()
+            >>> G.check_elem(G.generator())
+            True
+            >>> G.check_elem(G.unity())
+            True
+        """
+        # TODO: for some reason gt_is_valid doesn't accept unity
+        if pt == self.unity():
+            return True
+
+        return bool(_C.gt_is_valid(pt.pt))
+
+    def prod(self, elems):
+        """Product of a number of elements (not optimized)"""
+
+        res = GTGroup().unity()
+        for el in elems:
+            res *= el
+
+        return res
+
+    def wprod(self, weights, elems):
+        """Weighted product of a number of elements (not optimized)"""
+
+        # TODO: can be optimized a little by doing groups of 2
+        res = GTGroup().unity()
+        for w, el in zip(weights, elems):
+            res *= el ** w
+
+        return res
+
+    # Not implemented: list_curves(), parameters(), get_points_from_x
 
 
 class GTElem:
-    pass
+
+    __slots__ = ["pt"]
+
+    @staticmethod
+    def from_binary(sbin, group=None):
+        """Create an element from a byte sequence.
+
+        It accepts (but ignores) group as extra argument.
+
+        Example:
+            >>> G = GTGroup()
+            >>> byte_string = G.generator().export()                # Export EC point as byte string
+            >>> GTElem.from_binary(byte_string, G) == G.generator()    # Import EC point from binary string
+            True
+            >>> GTElem.from_binary(byte_string) == G.generator()    # Import EC point from binary string
+            True
+        """
+
+        ret = GTElem()
+        _C.gt_read_bin(ret.pt, sbin, len(sbin))
+        return ret
+
+    def __init__(self):
+        """Initialize a new g1 element"""
+        self.pt = _FFI.new("gt_t")
+        _C.gt_null(self.pt)
+        _C.gt_new(self.pt)
+
+    def __copy__(self):
+        new = GTElem()
+        _C.gt_copy(new.pt, self.pt)
+        return new
+
+    def mul(self, other):
+        """Multiplies two elements together. Synonym with self * other.
+
+        Example:
+            >>> g = GTGroup().generator()
+            >>> g.mul(g) == (g * g) == (g ** 2) == g.sqr() # Equivalent formulations
+            True
+        """
+        return self.__mul__(other)
+
+    def mul_inplace(self, other):
+        """Adds two points together and puts the result in self.pt.
+        """
+        return self.__imul__(other)
+
+    def __mul__(self, other):
+        res = GTElem()
+        _C.gt_mul(res.pt, self.pt, other.pt)
+        return res
+
+    def __imul__(self, other):
+        _C.gt_mul(self.pt, self.pt, other.pt)
+        return self
+
+    def div(self, other):
+        """Subtract two points. Synonym with self - other.
+
+        Example:
+            >>> g = GTGroup().generator()
+            >>> g.div(g) == GTGroup().unity()
+            True
+        """
+        return self.__truediv__(other)
+
+    def __truediv__(self, other):
+        res = other.inv()
+        _C.gt_mul(res.pt, self.pt, res.pt)
+        return res
+
+    def __itruediv__(self, other):
+        otherinv = other.inv()
+        _C.gt_mul(self.pt, self.pt, otherinv.pt)
+        return self
+
+    def __floordiv__(self, other):
+        return self.__truediv__(other)
+
+    def __ifloordiv__(self, other):
+        return self.__itruediv__(other)
+
+    def inv(self):
+        """Returns the inverse of the element. Synonym with self ** -1.
+
+        Example:
+            >>> G = GTGroup()
+            >>> g = G.generator()
+            >>> g * g.inv() == G.unity()    # Inversion function
+            True
+            >>> g * (g ** -1) == G.unity()    # Unary negative operator.
+            True
+            >>> g / g == G.unity()          # Binary operator
+            True
+        """
+        res = GTElem()
+        _C.gt_inv(res.pt, self.pt)
+        return res
+
+    def inv_inplace(self):
+        """Inverts the elements, and puts the result in self"""
+        _C.gt_inv(self.pt, self.pt)
+        return self
+
+    def sqr(self):
+        """Squares the element
+
+        Example:
+            >>> g = GTGroup().generator()
+            >>> g.sqr() == g * g
+            True
+        """
+        res = GTElem()
+        _C.gt_sqr(res.pt, self.pt)
+        return res
+
+    def sqr_inplace(self):
+        """Squares the element, and puts the result in self"""
+        _C.gt_sqr(self.pt, self.pt)
+        return self
+
+    def exp(self, scalar):
+        """Exponentiates the element with a scalar. Synonym with self ** scalar.
+
+        Example:
+            >>> G = GTGroup()
+            >>> g = G.generator()
+            >>> g ** 100 == g.exp(100) # Operator and function notation mean the same
+            True
+            >>> g ** G.order () == G.unity() # Scalar mul. by the order returns the identity element.
+            True
+        """
+        return self.__pow__(scalar)
+
+    def exp_inplace(self, scalar):
+        """ Exponentiates the element with a scalar and mutates the element to hold the result.
+        """
+        return self.__ipow__(scalar)
+
+    @force_Bn_other
+    def __pow__(self, other):
+        res = GTElem()
+        exp = other.mod(GTGroup().order())
+        _C.gt_exp(res.pt, self.pt, exp.bn)
+        return res
+
+    @force_Bn_other
+    def __ipow__(self, other):
+        _C.gt_exp(self.pt, self.pt, other.bn)
+        return self
+
+    def eq(self, other):
+        """Returns a boolean denoting whether the points are equal. Synonym with self == other.
+
+        Example:
+            >>> G = GTGroup()
+            >>> g = G.generator()
+            >>> (g ** 40) * (g ** 60) == g ** 100
+            True
+            >>> g == g ** 2
+            False
+        """
+        return self.__eq__(other)
+
+    def __eq__(self, other):
+        if not isinstance(other, GTElem):
+            return False
+
+        return _C.gt_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def is_unity(self):
+        """Returns True if this element is the unity element, otherwise False.
+
+        Example:
+            >>> G = GTGroup()
+            >>> g, o = G.generator(), G.order()
+            >>> (g ** o).is_unity()
+            True
+            >>> G.unity().is_unity()
+            True
+            >>> g.is_unity()
+            False
+        """
+        return bool(_C.gt_is_unity(self.pt))
+
+    def export(self, compressed=True):
+        """ Returns a string binary representation of the point in compressed coordinates.
+
+        Example:
+            >>> G = GTGroup()
+            >>> pt = G.generator() ** 10
+            >>> byte_string = pt.export()
+            >>> GTElem.from_binary(byte_string) == pt
+            True
+        """
+        flag = int(compressed)
+        length = _C.gt_size_bin(self.pt, flag)
+        buf = _FFI.new("char[]", length)
+        _C.gt_write_bin(buf, length, self.pt, flag)
+        return _FFI.unpack(buf, length)
+
+    def __hash__(self):
+        return self.export().__hash__()
+
+    def __repr__(self):
+        """ Representation of GTPoint
+
+        Examples:
+            >>> GTGroup().generator()
+            GTElem(1368bb445c7c2d209703f239689ce34c0378a68e72a6b3b216da0e22a5031b54ddff57309396b38c881c4c849ec23e87193502b86edb8857c273fa075a50512937e0794e1e65a7617c90d8bd66065b1fffe51d7a579973b1315021ec3c19934f01b2f522473d171391125ba84dc4007cfbf2f8da752f7c74185203fcca589ac719c34dffbbaad8431dad1c1fb597aaa5018107154f25a764bd3c79937a45b84546da634b8f6be14a8061e55cceba478b23f7dacaa35c8ca78beae9624045b4b619f26337d205fb469cd6bd15c3d5a04dc88784fbb3d0b2dbdea54d43b2b73f2cbb12d58386a8703e0f948226e47ee89d06fba23eb7c5af0d9f80940ca771b6ffd5857baaf222eb95a7d2809d61bfe02e1bfd1b68ff02f0b8102ae1c2d5d5ab1a04c581234d086a9902249b64728ffd21a189e87935a954051c7cdba7b3872629a4fafc05066245cb9108f0242d0fe3ef0f41e58663bf08cf068672cbd01a7ec73baca4d72ca93544deff686bfd6df543d48eaa24afe47e1efde449383b676631)
+        """
+        hx = hexlify(self.export()).decode("utf-8")
+        return "GTElem({})".format(hx)

@@ -133,6 +133,12 @@ typedef ep2_st ep2_t[1];
 typedef ep2_st g2_st;
 typedef ep2_t g2_t;
 
+/*
+ * ******** Typedefs for GT ********
+ */
+typedef fp2_t fp6_t[3];
+typedef fp6_t fp12_t[2];
+typedef fp12_t gt_t;
 
 /*
  * ******** Operations for G1 ********
@@ -207,6 +213,39 @@ int g2_is_valid(g2_t p);
 void g2_mul_sim(g2_t r, g2_t p, bn_t k, g2_t q, bn_t m);
 void g2_map(g2_t p, const uint8_t *bin, int len);
 
+
+/*
+ * ******** Operations for GT ********
+ */
+void gt_null(gt_t p);
+void gt_new(gt_t p);
+void gt_get_gen(gt_t p);
+void gt_get_ord(bn_t order);
+int gt_is_unity(gt_t p); //
+void gt_set_unity(gt_t p); //
+void gt_copy(gt_t r, gt_t p);
+int gt_cmp(gt_t p, gt_t q);
+void gt_rand(gt_t p);
+void gt_print(gt_t p);
+
+int gt_size_bin(gt_t p, int pack);
+void gt_read_bin(gt_t p, const uint8_t *bin, int len);
+void gt_write_bin(uint8_t *bin, int len, gt_t p, int pack);
+
+void gt_inv(gt_t r, gt_t p); //
+void gt_mul(gt_t r, gt_t p, gt_t q);
+// void gt_div(gt_t r, gt_t p, gt_t q);
+void gt_sqr(gt_t r, gt_t p);
+void gt_exp(gt_t r, gt_t p, bn_t k);
+void gt_exp_dig(gt_t r, gt_t p, dig_t k);
+int gt_is_valid(gt_t p);
+
+
+
+/*
+ * ******** Pairing Operations ********
+ */
+void pc_map(gt_t p, g1_t p, g2_t q);
 
 int pc_param_set_any();
 void pc_param_print();
