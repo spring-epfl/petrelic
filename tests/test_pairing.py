@@ -1,13 +1,15 @@
-from petrelic.pairing import G1Group, G1Elem
+from petrelic.pairing import G1Group, G1Elem, G2Group, G2Elem
 from petrelic.bn import Bn
 
 import pytest
 
 
-@pytest.fixture(params=["G1"])
+@pytest.fixture(params=["G1", "G2"])
 def group(request):
     if request.param == "G1":
         return G1Group()
+    if request.param == "G2":
+        return G2Group()
 
 
 def test_check_point(group):
@@ -50,11 +52,21 @@ def test_ec_arithmetic(group):
     assert len(str(g)) > 0
 
 
+def test_g1_affine():
+    group = G1Group()
+    g = group.generator()
+    x, y = g.get_affine()
+
+
+def test_g1_export_length():
+    group = G1Group()
+    g = group.generator()
+    assert len(g.export()) == 49
+
+
 def test_ec_io(group):
     g = group.generator()
 
-    x, y = g.get_affine()
-    assert len(g.export()) == 49
     i = group.infinite()
     assert len(i.export()) == 1
     assert g.from_binary(g.export(), group) == g
@@ -142,7 +154,8 @@ def test_pt_neg_inplace(group):
     assert id(b) == id(a)
 
 
-def test_ec_affine_inf(group):
+def test_g1_affine_inf():
+    group = G1Group()
     inf = group.infinite()
 
     with pytest.raises(Exception) as excinfo:

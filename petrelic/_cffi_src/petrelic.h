@@ -96,8 +96,12 @@ void bn_gen_prime_stron(bn_t a, int bits);
 typedef dig_t fp_t[6];
 typedef dig_t fp_st[6];
 
-typedef uint8_t appel;
+typedef fp_t fp2_t[2];
+typedef fp_st fp2_st[2];
 
+/*
+ * ******** Typedefs for G1 ********
+ */
 typedef struct {
 	/** The first coordinate. */
 	fp_st x;
@@ -108,18 +112,31 @@ typedef struct {
 	/** Flag to indicate that this point is normalized. */
 	int norm;
 } ep_st;
-
 typedef ep_st ep_t[1];
-
-typedef ep_t g1_t;
-// typedef ep2_t g2_t;
-// typedef fp12_t gt_t;
-
 typedef ep_st g1_st;
-// typedef ep2_st g2_st;
-// typedef fp12_st gt_st;
+typedef ep_t g1_t;
+
+/*
+ * ******** Typedefs for G2 ********
+ */
+typedef struct {
+  /** The first coordinate. */
+  fp2_t x;
+  /** The second coordinate. */
+  fp2_t y;
+  /** The third coordinate (projective representation). */
+  fp2_t z;
+  /** Flag to indicate that this point is normalized. */
+  int norm;
+} ep2_st;
+typedef ep2_st ep2_t[1];
+typedef ep2_st g2_st;
+typedef ep2_t g2_t;
 
 
+/*
+ * ******** Operations for G1 ********
+ */
 void g1_null(g1_t p);
 void g1_new(g1_t p);
 void g1_get_gen(g1_t p);
@@ -150,13 +167,46 @@ void g1_mul_sim(g1_t r, const g1_t p, const bn_t k, const g1_t q, const bn_t m);
 void g1_map(g1_t p, const uint8_t *bin, int len);
 
 /*
-  // Skipping precomputation table for now
-  void g1_mul_pre(g1_t *t, const g1_t p);
-  void g1_mul_fix(g1_t r, const g1_t *t, const bn_t k);
+// Skipping precomputation table for now
+void g1_mul_pre(g1_t *t, const g1_t p);
+void g1_mul_fix(g1_t r, const g1_t *t, const bn_t k);
 
 
-  void gt_set_unity(gt_t p);
 */
+
+
+
+/*
+ * ******** Operations for G2 ********
+ */
+void g2_null(g2_t p);
+void g2_new(g2_t p);
+void g2_get_gen(g2_t p);
+void g2_get_ord(bn_t order);
+int g2_is_infty(g2_t p);
+void g2_set_infty(g2_t p);
+void g2_copy(g2_t r, g2_t p);
+int g2_cmp(g2_t p, g2_t q);
+void g2_rand(g2_t p);
+void g2_print(g2_t p);
+
+int g2_size_bin(g2_t p, int pack);
+void g2_read_bin(g2_t p, const uint8_t *bin, int len);
+void g2_write_bin(uint8_t *bin, int len, g2_t p, int pack);
+
+void g2_neg(g2_t r, g2_t p);
+void g2_add(g2_t r, g2_t p, g2_t q);
+void g2_sub(g2_t r, g2_t p, g2_t q);
+void g2_dbl(g2_t r, g2_t p);
+void g2_norm(g2_t r, g2_t p);
+void g2_mul(g2_t r, g2_t p, bn_t k);
+void g2_mul_dig(g2_t r, g2_t p, dig_t k);
+void g2_mul_gen(g2_t r, bn_t k);
+int g2_is_valid(g2_t p);
+
+void g2_mul_sim(g2_t r, g2_t p, bn_t k, g2_t q, bn_t m);
+void g2_map(g2_t p, const uint8_t *bin, int len);
+
 
 int pc_param_set_any();
 void pc_param_print();
