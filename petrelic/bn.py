@@ -147,6 +147,24 @@ class Bn(object):
 
         return ret
 
+    @staticmethod
+    def get_random(bits):
+        """
+        Generates a random number of the given number of bits
+
+        Args:
+            bits (int) -- The number of bits
+
+        Examples:
+
+            >>> n = Bn.get_random(10)
+            >>> n.num_bits() <= 10
+            True
+        """
+        res = Bn()
+        _C.bn_rand(res.bn, 0, bits)
+        return res
+
     def __init__(self, num=0):
         """Initialize a new Bn, initialized with a small integer"""
         self.bn = _FFI.new("bn_t")
