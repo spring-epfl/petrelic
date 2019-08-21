@@ -34,6 +34,7 @@ class G1Group:
 
         pt = G1Elem()
         _C.g1_get_gen(pt.pt)
+        pt._is_gen = True
         return pt
 
     def infinite(self):
@@ -102,7 +103,7 @@ class G1Group:
 
 class G1Elem:
 
-    __slots__ = ["pt"]
+    __slots__ = ["pt", "_is_gen"]
 
     @staticmethod
     def from_binary(sbin, group=None):
@@ -126,12 +127,14 @@ class G1Elem:
     def __init__(self):
         """Initialize a new g1 element"""
         self.pt = _FFI.new("g1_t")
+        self._is_gen = False
         _C.g1_null(self.pt)
         _C.g1_new(self.pt)
 
     def __copy__(self):
         new = G1Elem()
         _C.g1_copy(new.pt, self.pt)
+        new._is_gen = self._is_gen
         return new
 
     def pt_add(self, other):
@@ -155,6 +158,7 @@ class G1Elem:
         return res
 
     def __iadd__(self, other):
+        self._is_gen = False
         _C.g1_add(self.pt, self.pt, other.pt)
         return self
 
@@ -174,6 +178,7 @@ class G1Elem:
         return res
 
     def __isub__(self, other):
+        self._is_gen = False
         _C.g1_sub(self.pt, self.pt, other.pt)
         return self
 
@@ -183,6 +188,7 @@ class G1Elem:
         return res
 
     def pt_double_inplace(self):
+        self._is_gen = False
         _C.g1_dbl(self.pt, self.pt)
         return self
 
@@ -202,8 +208,7 @@ class G1Elem:
 
     def pt_neg_inplace(self):
         # result = copy(self)
-        _C.g1_neg(self.pt, self.pt)
-        return self
+        return self.__ineg__()
 
     def __neg__(self):
         # result = copy(self)
@@ -212,6 +217,7 @@ class G1Elem:
         return res
 
     def __ineg__(self):
+        self._is_gen = False
         _C.g1_neg(self.pt, self.pt)
         return self
 
@@ -232,13 +238,17 @@ class G1Elem:
     def pt_mul_inplace(self, scalar):
         """ Multiplies a scalar with a point and mutates the point to hold the result.
         """
+        self._is_gen = False
         _C.g1_mul(self.pt, self.pt, scalar.bn)
         return self
 
     @force_Bn_other
     def __rmul__(self, other):
         res = G1Elem()
-        _C.g1_mul(res.pt, self.pt, other.bn)
+        if self._is_gen:
+            _C.g1_mul_gen(res.pt, other.bn)
+        else:
+            _C.g1_mul(res.pt, self.pt, other.bn)
         return res
 
     def pt_eq(self, other):
