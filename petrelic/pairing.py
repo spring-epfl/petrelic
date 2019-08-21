@@ -277,6 +277,25 @@ class G1Elem:
         _C.g1_norm(self.pt, self.pt)
         return bool(_C.g1_is_infty(self.pt))
 
+    def pair(self, other):
+        """Computes bilinear pairing with self and otherwise
+
+        Examples:
+            >>> G1 = G1Group()
+            >>> G2 = G2Group()
+            >>> GT = GTGroup()
+            >>> G1.generator().pair(G2.generator()) == GT.generator()
+            True
+
+            >>> p = 100 * G1.generator()
+            >>> q = 200 * G2.generator()
+            >>> p.pair(q) == GT.generator() ** 20000
+            True
+        """
+        res = GTElem()
+        _C.pc_map(res.pt, self.pt, other.pt)
+        return res
+
     def export(self, compressed=True):
         """ Returns a string binary representation of the point in compressed coordinates.
 
