@@ -25,11 +25,6 @@ def test_bn_constructors():
     assert Bn.from_binary(Bn(100).binary()) == Bn(100)
     assert Bn.from_binary(Bn(100).binary()) == 100
 
-    with pytest.raises(Exception) as excinfo:
-        s = 2 ** 65
-        Bn(s)
-    assert "does not fit" in str(excinfo.value)
-
     # assert Bn.from_binary(Bn(-100).binary()) != Bn(50)
     assert int(Bn(-100)) == -100
 
@@ -39,6 +34,22 @@ def test_bn_constructors():
 
     d = {Bn(5): 5, Bn(6): 6}
     assert Bn(5) in d
+
+
+def test_bn_large_integer():
+    num = 2 ** 128 + 1
+    a = Bn(num)
+
+    assert a.num_bits() == 129
+    assert a == Bn(2) ** 128 + 1
+
+
+def test_bn_large_negative_integer():
+    num = -2 ** 128 + 1
+    a = Bn(num)
+
+    assert a.num_bits() == 128
+    assert a == -Bn(2) ** 128 + 1
 
 
 def test_bn_prime():

@@ -170,10 +170,12 @@ class Bn(object):
         self.bn = _FFI.new("bn_t")
         _C.bn_new(self.bn)
 
-        # TODO: Fix parsing, to support converting bigger numbers
-        if num >= consts.DIGIT_MAXIMUM:
-            raise Exception("num does not fit directly inside Bn")
-        _C.bn_set_dig(self.bn, abs(num))
+        if abs(num) < consts.DIGIT_MAXIMUM:
+            _C.bn_set_dig(self.bn, abs(num))
+        else:
+            length = num.bit_length() // 8 + 1
+            sbin = abs(num).to_bytes(length, byteorder='big', signed=False)
+            _C.bn_read_bin(self.bn, sbin, len(sbin))
 
         if num < 0:
             _C.bn_neg(self.bn, self.bn)
