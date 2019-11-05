@@ -13,7 +13,7 @@ To install it: ::
 
     git clone https://github.com/relic-toolkit/relic.git
     cd relic
-    sed 's/DSHLIB=OFF/DSHLIB=ON/' preset/x64-pbc-bls381.sh > preset/01custom.sh
+    sed 's/DSHLIB=OFF/DSHLIB=ON/' preset/x64-pbc-bls381.sh > preset/00custom.sh
     chmod +x preset/00custom.sh
     ./preset/00custom.sh -DCMAKE_INSTALL_PREFIX=/usr/local
     make
