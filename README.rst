@@ -11,6 +11,7 @@ RELIC is required to use this project.
 
 To install it:
 
+.. code:: bash
     git clone https://github.com/relic-toolkit/relic.git
     cd relic
     cat << EOF > preset/00custom.sh
@@ -24,10 +25,12 @@ To install it:
 
 The library path might also need to be updated:
 
+.. code:: bash
     export LD_LIBRARY_PATH=/usr/local/lib:"$LD_LIBRARY_PATH"
 
 Using a virtual environment is also advised:
 
+.. code:: bash
     virtualenv -p /usr/bin/python3 venv/
 
 Development
@@ -35,4 +38,5 @@ Development
 
 To start developing on `petrelic` create a local installation:
 
+.. code:: bash
      pip3 install -v -e '.[dev]'
