@@ -9,9 +9,8 @@ Prerequisites
 
 RELIC is required to use this project.
 
-To install it:
+To install it: ::
 
-.. code-block:: bash
     git clone https://github.com/relic-toolkit/relic.git
     cd relic
     cat << EOF > preset/00custom.sh
@@ -23,20 +22,17 @@ To install it:
     make
     sudo make install
 
-The library path might also need to be updated:
+The library path might also need to be updated: ::
 
-.. code-block:: bash
     export LD_LIBRARY_PATH=/usr/local/lib:"$LD_LIBRARY_PATH"
 
-Using a virtual environment is also advised:
+Using a virtual environment is also advised: ::
 
-.. code-block:: bash
     virtualenv -p /usr/bin/python3 venv/
 
 Development
 -----------
 
-To start developing on `petrelic` create a local installation:
+To start developing on `petrelic` create a local installation: ::
 
-.. code-block:: bash
      pip3 install -v -e '.[dev]'
