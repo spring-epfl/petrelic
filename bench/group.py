@@ -2,7 +2,7 @@ import timeit
 import time
 import secrets
 
-from petrelic.pairing import G1Group, G2Group, GTGroup
+from petrelic.petlib.pairing import G1Group, G2Group, GTGroup
 from petrelic.bn import Bn
 
 # WARNING: If changing from 1000 the results will no longer be in milliseconds
