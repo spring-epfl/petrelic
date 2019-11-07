@@ -1,9 +1,9 @@
+
+"""Clean API of the petrelic library.
+"""
+
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
-import petrelic.constants as consts
-
-"""Clean API for the petrelic library.
-"""
 
 #
 # Exceptions
@@ -554,7 +554,7 @@ class G2Element():
     def __ne__(self, other):
         """Check that the points on the EC are not equal."""
         if not isinstance(other, G2Element):
-            return true
+            return True
 
         return _C.g2_cmp(self.pt, other.pt) != _C.CONST_RLC_EQ
 
@@ -693,7 +693,7 @@ class GtElement():
         copy = GtElement()
         _C.gt_copy(copy.pt, self.pt)
         return copy
-        
+
     #
     # Misc
     #
@@ -847,7 +847,7 @@ class GtElement():
 
     def __itruediv__(self, other):
         other_inv = other.inverse()
-        _C.gt_mul(self.pt, self.pt, res.pt)
+        _C.gt_mul(self.pt, self.pt, other_inv.pt)
         return self
 
     @force_Bn_other

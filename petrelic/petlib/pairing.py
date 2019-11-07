@@ -1,3 +1,5 @@
+"""Petlib compatible API of the petrelic library.
+"""
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
 import petrelic.constants as consts
