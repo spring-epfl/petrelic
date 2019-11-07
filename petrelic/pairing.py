@@ -89,15 +89,36 @@ class G1:
         _C.g1_set_infty(neutral.pt)
         return neutral
 
+    @staticmethod
+    def hash_to_point(hinput):
+        return G1Element.from_hashed_bytes(hinput)
+
+    @staticmethod
+    def sum(elems):
+        return sum(elems)
+
+    @staticmethod
+    def wsum(weights, elems):
+        res = G1.get_neutral_element()
+        for w, el in zip(weights, elems):
+            res += w * el
+
+        return res
+
+
     #
     # Aliases
     #
 
     get_infinity = get_neutral_element
+    generator = get_generator
+    order = get_order
 
 
 class G1Element():
     """Element of the G1 group."""
+
+    group = G1
 
     def __init__(self):
         """Initialize a new element of G1."""
@@ -199,6 +220,11 @@ class G1Element():
         _C.fp_prime_back(y.bn, self.pt[0].y)
 
         return x, y
+
+    def pair(self, other):
+        res = GtElement()
+        _C.pc_map(res.pt, self.pt, other.pt)
+        return res
 
     def __hash__(self):
         """Hash function used internally by Python."""
@@ -399,15 +425,36 @@ class G2:
         _C.g2_set_infty(neutral.pt)
         return neutral
 
+    @staticmethod
+    def sum(elems):
+        return sum(elems)
+
+    @staticmethod
+    def wsum(weights, elems):
+        res = G2.get_neutral_element()
+        for w, el in zip(weights, elems):
+            res += w * el
+
+        return res
+
+
+    @staticmethod
+    def hash_to_point(hinput):
+        return G2Element.from_hashed_bytes(hinput)
+
     #
     # Aliases
     #
 
     get_infinity = get_neutral_element
+    generator = get_generator
+    order = get_order
 
 
 class G2Element():
     """G2 element."""
+
+    group = G2
 
     def __init__(self):
         """Initialize a new element of G2."""
@@ -672,15 +719,31 @@ class Gt:
         _C.gt_set_unity(neutral.pt)
         return neutral
 
+    @staticmethod
+    def wsum(weights, elems):
+        res = Gt.get_neutral_element()
+        for w, el in zip(weights, elems):
+            res += w * el
+
+        return res
+
+    @staticmethod
+    def sum(elems):
+        return sum(elems)
+
     #
     # Aliases
     #
 
     get_unity = get_neutral_element
+    generator = get_generator
+    order = get_order
 
 
 class GtElement():
     """Gt element."""
+
+    group = Gt
 
     def __init__(self):
         """Initialize a new element of Gt."""

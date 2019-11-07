@@ -12,6 +12,25 @@ from petrelic.pairing import (
     NoAffineCoordinateForECPoint
 )
 
+class BilinearGroupPair:
+    """
+    A bilinear group pair.
+
+    Contains two origin groups G1, G2 and the image group Gt.
+    """
+
+    def __init__(self):
+        self.GT = Gt()
+        self.G1 = G1()
+        self.G2 = G2()
+
+    def groups(self):
+        """
+        Returns the three groups in the following order :  G1, G2, Gt.
+        """
+        return self.G1, self.G2, self.GT
+
+
 class Gt:
     """Gt group."""
 
