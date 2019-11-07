@@ -42,7 +42,7 @@ def test_ec_from_x(group):
 def test_ec_arithmetic(group):
     g = group.get_generator()
     assert g + g == g + g
-    assert g + g == g.get_double()
+    assert g + g == g.double()
     assert g + g == Bn(2) * g
     assert g + g == 2 * g
 
@@ -64,7 +64,7 @@ def test_ec_arithmetic(group):
 def test_gt_multiplication():
     g = Gt.get_generator()
     assert g * g == g * g
-    assert g * g == g.get_square()
+    assert g * g == g.square()
     assert g * g == g ** Bn(2)
     assert g * g == g ** 2
     assert g * g * g == g ** 3
@@ -84,15 +84,15 @@ def test_gt_inverse():
     g = Gt.get_generator()
     elem = g ** 1337
 
-    assert elem * elem.get_inverse() == Gt.get_neutral_element()
-    assert elem.get_inverse() == elem ** (-1)
+    assert elem * elem.inverse() == Gt.get_neutral_element()
+    assert elem.inverse() == elem ** (-1)
 
 
 def test_gt_exponentiation():
     g = Gt.get_generator()
 
     assert g ** 3 == g * g * g
-    assert g ** (-1) == g.get_inverse()
+    assert g ** (-1) == g.inverse()
     assert g ** 10 == g.pow(10)
     assert g ** Bn(10) == g.pow(Bn(10))
 
@@ -174,14 +174,14 @@ def test_double(group):
     Does double() double correctly?
     """
     g = group.get_generator()
-    a = g.get_double()
-    g.double()
+    a = g.double()
+    g.idouble()
     assert a == g
 
     # Does it save the result in the same memory location?
     a = group.get_generator()
     b = a
-    a.double()
+    a.idouble()
     assert id(b) == id(a)
 
 
@@ -190,16 +190,16 @@ def test_square():
     Does square() square correctly?
     """
     g = Gt.get_generator()
-    a = g.get_square()
+    a = g.square()
     b = Gt.get_generator()
-    b.square()
+    b.isquare()
     assert a == b
 
     # Does it save the result in the same memory location?
 
     a = Gt.get_generator()
     b = a
-    a.square()
+    a.isquare()
     assert id(b) == id(a)
 
 
@@ -246,13 +246,13 @@ def test_neg(group):
 
 def test_inverse():
     g = Gt.get_generator()
-    a = g.get_inverse()
-    g.inverse()
+    a = g.inverse()
+    g.iinverse()
     assert a == g
 
     a = Gt.get_generator()
     b = a
-    a.inverse()
+    a.iinverse()
     assert id(b) == id(a)
 
 
