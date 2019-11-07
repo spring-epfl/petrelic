@@ -23,11 +23,6 @@ The library path might also need to be updated: ::
 
     export LD_LIBRARY_PATH=/usr/local/lib:"$LD_LIBRARY_PATH"
 
-
-Thanks to a bug in pytest, it is necessary to ignore mismatch import to run the tests: ::
-
-   export PY_IGNORE_IMPORTMISMATCH=1
-
 Using a virtual environment is also advised: ::
 
     virtualenv -p /usr/bin/python3 venv/
