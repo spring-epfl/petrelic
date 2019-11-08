@@ -1,6 +1,9 @@
 """Additive API of the petrelic library.
 """
 
+import msgpack
+import petlib.pack as pack
+
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
 
@@ -20,6 +23,7 @@ class BilinearGroupPair:
     """
 
     def __init__(self):
+        """Initialise a bilinear group pair."""
         self.GT = Gt()
         self.G1 = G1()
         self.G2 = G2()
@@ -301,3 +305,26 @@ class GtElement():
     isub = __isub__
     mul = __mul__
     imul = __imul__
+
+
+def pt_enc(obj):
+    """Encoder for the wrapped points."""
+    data = obj.to_binary()
+    packed_data = msgpack.packb(data)
+    return packed_data
+
+
+def pt_dec(bptype):
+    """Decoder for the wrapped points."""
+
+    def dec(data):
+        data_extracted = msgpack.unpackb(data)
+        pt = bptype.from_binary(data_extracted)
+        return pt
+
+    return dec
+
+# Register encoders and decoders for pairing points
+pack.register_coders(G1Element, 111, pt_enc, pt_dec(G1Element))
+pack.register_coders(G2Element, 112, pt_enc, pt_dec(G2Element))
+pack.register_coders(GtElement, 113, pt_enc, pt_dec(GtElement))
