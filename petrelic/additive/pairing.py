@@ -7,13 +7,10 @@ import petlib.pack as pack
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
 
-from petrelic.pairing import (
-    G1,
-    G2,
-    G1Element,
-    G2Element,
-    NoAffineCoordinateForECPoint
-)
+from petrelic.pairing import G2
+from petrelic.pairing import G1Element as G1ElementOriginal
+from petrelic.pairing import G2Element
+from petrelic.pairing import NoAffineCoordinateForECPoint
 
 class BilinearGroupPair:
     """
@@ -33,6 +30,91 @@ class BilinearGroupPair:
         Returns the three groups in the following order :  G1, G2, Gt.
         """
         return self.G1, self.G2, self.GT
+
+
+class G1:
+    """G1 group."""
+
+    @staticmethod
+    def get_order():
+        """Return the order of the EC group as a Bn large integer.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> neutral = G1.get_neutral_element()
+            >>> order = G1.get_order()
+            >>> order * generator == neutral
+            True
+        """
+        order = Bn()
+        _C.g1_get_ord(order.bn)
+        return order
+
+    @staticmethod
+    def get_generator():
+        """Return generator of the EC group.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> neutral = G1.get_neutral_element()
+            >>> generator + neutral == generator
+            True
+        """
+        generator = G1Element()
+        _C.g1_get_gen(generator.pt)
+        generator._is_gen = True
+        return generator
+
+    @staticmethod
+    def get_neutral_element():
+        """Return the neutral element of the group G1.
+        In this case, a point at infinity.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> neutral = G1.get_neutral_element()
+            >>> generator + neutral == generator
+            True
+        """
+        neutral = G1Element()
+        _C.g1_set_infty(neutral.pt)
+        return neutral
+
+
+    @staticmethod
+    def hash_to_point(hinput):
+        return G1Element.from_hashed_bytes(hinput)
+
+    @staticmethod
+    def sum(elems):
+        return sum(elems)
+
+    @staticmethod
+    def wsum(weights, elems):
+        res = G1.get_neutral_element()
+        for w, el in zip(weights, elems):
+            res += w * el
+
+        return res
+
+    #
+    # Aliases
+    #
+
+    get_infinity = get_neutral_element
+    infinite = get_neutral_element
+    generator = get_generator
+    order = get_order
+
+
+class G1Element(G1ElementOriginal):
+    def __init__(self):
+        super().__init__()
+
+    def pair(self, other):
+        res = GtElement()
+        _C.pc_map(res.pt, self.pt, other.pt)
+        return res
 
 
 class Gt:
@@ -325,6 +407,6 @@ def pt_dec(bptype):
     return dec
 
 # Register encoders and decoders for pairing points
-pack.register_coders(G1Element, 111, pt_enc, pt_dec(G1Element))
-pack.register_coders(G2Element, 112, pt_enc, pt_dec(G2Element))
-pack.register_coders(GtElement, 113, pt_enc, pt_dec(GtElement))
+pack.register_coders(G1Element, 114, pt_enc, pt_dec(G1Element))
+pack.register_coders(G2Element, 115, pt_enc, pt_dec(G2Element))
+pack.register_coders(GtElement, 116, pt_enc, pt_dec(GtElement))
