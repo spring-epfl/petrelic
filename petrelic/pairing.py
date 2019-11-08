@@ -111,6 +111,7 @@ class G1:
     #
 
     get_infinity = get_neutral_element
+    infinite = get_neutral_element
     generator = get_generator
     order = get_order
 
@@ -447,6 +448,7 @@ class G2:
     #
 
     get_infinity = get_neutral_element
+    infinite = get_neutral_element
     generator = get_generator
     order = get_order
 

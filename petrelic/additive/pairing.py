@@ -82,6 +82,9 @@ class Gt:
     # Aliases
     #
 
+    get_unity = get_neutral_element
+    unity = get_neutral_element
+
 
 class GtElement():
     """Gt element."""
