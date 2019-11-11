@@ -45,6 +45,10 @@ class G1:
     """G1 group."""
 
     @staticmethod
+    def element():
+        return G1Element()
+
+    @staticmethod
     def get_order():
         """Return the order of the EC group as a Bn large integer.
 
@@ -69,7 +73,7 @@ class G1:
             >>> generator + neutral == generator
             True
         """
-        generator = G1Element()
+        generator = G1.element()
         _C.g1_get_gen(generator.pt)
         generator._is_gen = True
         return generator
@@ -85,7 +89,7 @@ class G1:
             >>> generator + neutral == generator
             True
         """
-        neutral = G1Element()
+        neutral = G1.element()
         _C.g1_set_infty(neutral.pt)
         return neutral
 
@@ -130,10 +134,14 @@ class G1Element():
 
     def __copy__(self):
         """Clone an element of G1."""
-        copy = G1Element()
+        copy = __class__._myself()
         _C.g1_copy(copy.pt, self.pt)
         copy._is_gen = self._is_gen
         return copy
+
+    @staticmethod
+    def _myself():
+        return G1Element()
 
     #
     # Misc
@@ -148,7 +156,7 @@ class G1Element():
             >>> elem.is_valid()
             True
         """
-        res = G1Element()
+        res = __class__._myself()
         _C.g1_map(res.pt, hinput, len(hinput))
         return res
 
@@ -184,7 +192,7 @@ class G1Element():
             >>> elem == 2 * generator
             True
         """
-        res = G1Element()
+        res = __class__._myself()
         _C.g1_dbl(res.pt, self.pt)
         return res
 
@@ -251,7 +259,7 @@ class G1Element():
             >>> generator == elem
             True
         """
-        elem = G1Element()
+        elem = __class__._myself()
         elem._is_gen = False
         _C.g1_read_bin(elem.pt, sbin, len(sbin))
         return elem
@@ -278,7 +286,7 @@ class G1Element():
 
     def __neg__(self):
         """Return the inverse of the element of the G1."""
-        res = G1Element()
+        res = __class__._myself()
         _C.g1_neg(res.pt, self.pt)
         return res
 
@@ -305,12 +313,12 @@ class G1Element():
     #
 
     def __add__(self, other):
-        res = G1Element()
+        res = __class__._myself()
         _C.g1_add(res.pt, self.pt, other.pt)
         return res
 
     def __radd__(self, other):
-        res = G1Element()
+        res = __class__._myself()
         _C.g1_add(res.pt, other.pt, self.pt)
         return res
 
@@ -320,12 +328,12 @@ class G1Element():
         return self
 
     def __sub__(self, other):
-        res = G1Element()
+        res = __class__._myself()
         _C.g1_sub(res.pt, self.pt, other.pt)
         return res
 
     def __rsub__(self, other):
-        res = G1Element()
+        res = __class__._myself()
         _C.g1_sub(res.pt, other.pt, self.pt)
         return res
 
@@ -336,7 +344,7 @@ class G1Element():
 
     @force_Bn_other
     def __mul__(self, other):
-        res = G1Element()
+        res = __class__._myself()
         if self._is_gen:
             _C.g1_mul_gen(res.pt, other.bn)
         else:
@@ -345,7 +353,7 @@ class G1Element():
 
     @force_Bn_other
     def __rmul__(self, other):
-        res = G1Element()
+        res = __class__._myself()
         if self._is_gen:
             _C.g1_mul_gen(res.pt, other.bn)
         else:
