@@ -7,7 +7,7 @@ from zksk import Secret
 from zksk.primitives.bbsplus import BBSPlusKeypair, BBSPlusSignatureCreator
 from zksk.primitives.bbsplus import BBSPlusSignatureStmt
 
-@pytest.mark.skip(reason="not working as of now due to petlib dependancy")
+#@pytest.mark.skip(reason="not working as of now due to petlib dependancy")
 def test_signature_setup():
     mG = BilinearGroupPair()
     keypair = BBSPlusKeypair.generate(mG, 9)
@@ -25,7 +25,7 @@ def test_signature_setup():
         pk, messages
     )
 
-@pytest.mark.skip(reason="not working as of now due to petlib dependancy")
+#@pytest.mark.skip(reason="not working as of now due to petlib dependancy")
 def test_signature_proof():
     mG = BilinearGroupPair()
     keypair = BBSPlusKeypair.generate(mG, 9)
@@ -58,7 +58,7 @@ def test_signature_proof():
     resp = prover.compute_response(chal)
     assert verifier.verify(resp)
 
-@pytest.mark.skip(reason="not working as of now due to petlib dependancy")
+#@pytest.mark.skip(reason="not working as of now due to petlib dependancy")
 def test_signature_non_interactive_proof():
     mG = BilinearGroupPair()
     keypair = BBSPlusKeypair.generate(mG, 9)
