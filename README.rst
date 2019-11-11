@@ -34,3 +34,17 @@ To start developing on `petrelic` create a local installation: ::
 
      pip3 install -v -e '.[dev]'
 
+Zksk Integration
+----------------
+
+This library can be integrated with Zksk, to do so, the bn-wrapper branch of Zksk needs to be installed, and a global variable needs to be changed: ::
+
+   cd ..
+   git clone https://github.com/spring-epfl/zksk.git
+   cd zksk
+   git checkout bn-wrapper
+   sed -i 's/BACKEND\s*=\s*"openssl"/BACKEND = "relic"/' zksk/bn.py
+   cd ../petrelic
+   . venv/bin/activate
+   pip install -e ../zksk/
+
