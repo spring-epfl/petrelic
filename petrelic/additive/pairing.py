@@ -7,9 +7,7 @@ import petlib.pack as pack
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
 
-from petrelic.pairing import G1 as G1Original
 from petrelic.pairing import G2
-from petrelic.pairing import G1Element as G1ElementOriginal
 from petrelic.pairing import G2Element
 from petrelic.pairing import NoAffineCoordinateForECPoint
 
@@ -33,23 +31,111 @@ class BilinearGroupPair:
         return self.G1, self.G2, self.GT
 
 
-class G1(G1Original):
+class G1:
     """G1 group."""
-
-    def __init__(self):
-        super().__init__()
 
     @staticmethod
     def element():
         return G1Element()
 
-class G1Element(G1ElementOriginal):
+    @staticmethod
+    def get_order():
+        """Return the order of the EC group as a Bn large integer.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> neutral = G1.get_neutral_element()
+            >>> order = G1.get_order()
+            >>> order * generator == neutral
+            True
+        """
+        order = Bn()
+        _C.g1_get_ord(order.bn)
+        return order
+
+    @staticmethod
+    def get_generator():
+        """Return generator of the EC group.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> neutral = G1.get_neutral_element()
+            >>> generator + neutral == generator
+            True
+        """
+        generator = G1.element()
+        _C.g1_get_gen(generator.pt)
+        generator._is_gen = True
+        return generator
+
+    @staticmethod
+    def get_neutral_element():
+        """Return the neutral element of the group G1.
+        In this case, a point at infinity.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> neutral = G1.get_neutral_element()
+            >>> generator + neutral == generator
+            True
+        """
+        neutral = G1.element()
+        _C.g1_set_infty(neutral.pt)
+        return neutral
+
+    @staticmethod
+    def hash_to_point(hinput):
+        return G1Element.from_hashed_bytes(hinput)
+
+    @staticmethod
+    def sum(elems):
+        return sum(elems)
+
+    @staticmethod
+    def wsum(weights, elems):
+        res = G1.get_neutral_element()
+        for w, el in zip(weights, elems):
+            res += w * el
+
+        return res
+
+
+    #
+    # Aliases
+    #
+
+    get_infinity = get_neutral_element
+    infinite = get_neutral_element
+    generator = get_generator
+    order = get_order
+
+
+class G1Element():
+    """Element of the G1 group."""
+
+    group = G1
+
     def __init__(self):
-        super().__init__()
+        """Initialize a new element of G1."""
+        self.pt = _FFI.new("g1_t")
+        self._is_gen = False
+        _C.g1_null(self.pt)
+        _C.g1_new(self.pt)
+
+    def __copy__(self):
+        """Clone an element of G1."""
+        copy = __class__._myself()
+        _C.g1_copy(copy.pt, self.pt)
+        copy._is_gen = self._is_gen
+        return copy
 
     @staticmethod
     def _myself():
         return G1Element()
+
+    #
+    # Misc
+    #
 
     @staticmethod
     def from_hashed_bytes(hinput):
@@ -64,10 +150,231 @@ class G1Element(G1ElementOriginal):
         _C.g1_map(res.pt, hinput, len(hinput))
         return res
 
+    def is_valid(self):
+        """Check if the data of this object is indeed a point on the EC.
+
+        Example:
+            >>> elem = G1Element.from_hashed_bytes(b"foo")
+            >>> elem.is_valid()
+            True
+        """
+        return bool(_C.g1_is_valid(self.pt))
+
+    def is_neutral_element(self):
+        """Check if the object is the neutral element of G1.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> order = G1.get_order()
+            >>> elem = order * generator
+            >>> elem.is_neutral_element()
+            True
+        """
+        _C.g1_norm(self.pt, self.pt)
+        return bool(_C.g1_is_infty(self.pt))
+
+    def double(self):
+        """Return an element which is the double of the current one.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> elem = generator.double()
+            >>> elem == 2 * generator
+            True
+        """
+        res = __class__._myself()
+        _C.g1_dbl(res.pt, self.pt)
+        return res
+
+    def idouble(self):
+        """Double the current element.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> elem = G1.get_generator().idouble()
+            >>> elem == 2 * generator
+            True
+        """
+        self._is_gen = False
+        _C.g1_dbl(self.pt, self.pt)
+        return self
+
+    def get_affine_coordinates(self):
+        """Return the affine coordinates (x,y) of this EC Point.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> x, y = generator.get_affine_coordinates()
+            >>> x
+            Bn(3685416753713387016781088315183077757961620795782546409894578378688607592378376318836054947676345821548104185464507)
+            >>> y
+            Bn(1339506544944476473020471379941921221584933875938349620426543736416511423956333506472724655353366534992391756441569)
+        """
+        if self.is_neutral_element():
+            raise NoAffineCoordinateForECPoint()
+
+        x = Bn()
+        y = Bn()
+        _C.fp_prime_back(x.bn, self.pt[0].x)
+        _C.fp_prime_back(y.bn, self.pt[0].y)
+
+        return x, y
+
     def pair(self, other):
         res = GtElement()
         _C.pc_map(res.pt, self.pt, other.pt)
         return res
+
+    def __hash__(self):
+        """Hash function used internally by Python."""
+        return self.to_binary().__hash__()
+
+    def __repr__(self):
+        """String representation of the element of G1."""
+        pt_hex = self.to_binary().hex()
+        return 'G1Element({})'.format(pt_hex)
+
+    #
+    # Serialization
+    #
+
+    @staticmethod
+    def from_binary(sbin):
+        """Deserialize a binary representation of the element of G1.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> bin_repr = generator.to_binary()
+            >>> elem = G1Element.from_binary(bin_repr)
+            >>> generator == elem
+            True
+        """
+        elem = __class__._myself()
+        elem._is_gen = False
+        _C.g1_read_bin(elem.pt, sbin, len(sbin))
+        return elem
+
+    def to_binary(self, compressed=True):
+        """Serialize the element of G1 into a binary representation.
+
+        Example:
+            >>> generator = G1.get_generator()
+            >>> bin_repr = generator.to_binary()
+            >>> elem = G1Element.from_binary(bin_repr)
+            >>> generator == elem
+            True
+        """
+        flag = 1 if compressed else 0
+        length = _C.g1_size_bin(self.pt, flag)
+        buf = _FFI.new("char[]", length)
+        _C.g1_write_bin(buf, length, self.pt, flag)
+        return _FFI.unpack(buf, length)
+
+    #
+    # Unary operators
+    #
+
+    def __neg__(self):
+        """Return the inverse of the element of the G1."""
+        res = __class__._myself()
+        _C.g1_neg(res.pt, self.pt)
+        return res
+
+    #
+    # Comparison operators
+    #
+
+    def __eq__(self, other):
+        """Check that the points on the EC are equal."""
+        if not isinstance(other, G1Element):
+            return False
+
+        return _C.g1_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
+
+    def __ne__(self, other):
+        """Check that the points on the EC are not equal."""
+        if not isinstance(other, G1Element):
+            return True
+
+        return _C.g1_cmp(self.pt, other.pt) != _C.CONST_RLC_EQ
+
+    #
+    # Binary operators
+    #
+
+    def __add__(self, other):
+        res = __class__._myself()
+        _C.g1_add(res.pt, self.pt, other.pt)
+        return res
+
+    def __radd__(self, other):
+        res = __class__._myself()
+        _C.g1_add(res.pt, other.pt, self.pt)
+        return res
+
+    def __iadd__(self, other):
+        self._is_gen = False
+        _C.g1_add(self.pt, self.pt, other.pt)
+        return self
+
+    def __sub__(self, other):
+        res = __class__._myself()
+        _C.g1_sub(res.pt, self.pt, other.pt)
+        return res
+
+    def __rsub__(self, other):
+        res = __class__._myself()
+        _C.g1_sub(res.pt, other.pt, self.pt)
+        return res
+
+    def __isub__(self, other):
+        self._is_gen = False
+        _C.g1_sub(self.pt, self.pt, other.pt)
+        return self
+
+    @force_Bn_other
+    def __mul__(self, other):
+        res = __class__._myself()
+        if self._is_gen:
+            _C.g1_mul_gen(res.pt, other.bn)
+        else:
+            _C.g1_mul(res.pt, self.pt, other.bn)
+        return res
+
+    @force_Bn_other
+    def __rmul__(self, other):
+        res = __class__._myself()
+        if self._is_gen:
+            _C.g1_mul_gen(res.pt, other.bn)
+        else:
+            _C.g1_mul(res.pt, self.pt, other.bn)
+        return res
+
+    @force_Bn_other
+    def __imul__(self, other):
+        if self._is_gen:
+            _C.g1_mul_gen(self.pt, other.bn)
+            self._is_gen = False
+        else:
+            _C.g1_mul(self.pt, self.pt, other.bn)
+        return self
+
+    #
+    # Aliases
+    #
+
+    __deepcopy__ = __copy__
+    is_infinity = is_neutral_element
+    inverse = __neg__
+    neg = __neg__
+    eq = __eq__
+    ne = __ne__
+    add = __add__
+    iadd = __iadd__
+    sub = __sub__
+    isub = __isub__
+    mul = __mul__
+    imul = __imul__
 
 
 class Gt:
@@ -117,16 +424,32 @@ class Gt:
         _C.gt_set_unity(neutral.pt)
         return neutral
 
+    @staticmethod
+    def wsum(weights, elems):
+        res = Gt.get_neutral_element()
+        for w, el in zip(weights, elems):
+            res += w * el
+
+        return res
+
+    @staticmethod
+    def sum(elems):
+        return sum(elems)
+
     #
     # Aliases
     #
 
-    get_unity = get_neutral_element
-    unity = get_neutral_element
+    order = get_order
+    generator = get_generator
+    get_infinite = get_neutral_element
+    infinite = get_neutral_element
 
 
 class GtElement():
     """Gt element."""
+
+    group = Gt
 
     def __init__(self):
         """Initialize a new element of Gt."""
