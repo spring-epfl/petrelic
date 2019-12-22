@@ -212,3 +212,7 @@ def test_bn_abs():
 
     assert Bn(5).abs() == Bn(5)
     assert Bn(-5).abs() == Bn(5)
+
+def test_bn_pow():
+    assert Bn(2).pow(Bn(8)) == Bn(256)
+    assert Bn(2).pow(8) == Bn(256)
