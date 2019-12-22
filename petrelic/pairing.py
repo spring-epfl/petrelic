@@ -44,12 +44,16 @@ class BilinearGroupPair:
 class G1:
     """G1 group."""
 
-    @staticmethod
-    def element():
-        return G1Element()
+    @classmethod
+    def element_type(cls):
+        return G1Element
 
-    @staticmethod
-    def get_order():
+    @classmethod
+    def new_element(cls):
+        return cls.element_type()()
+
+    @classmethod
+    def get_order(cls):
         """Return the order of the EC group as a Bn large integer.
 
         Example:
@@ -63,8 +67,8 @@ class G1:
         _C.g1_get_ord(order.bn)
         return order
 
-    @staticmethod
-    def get_generator():
+    @classmethod
+    def get_generator(cls):
         """Return generator of the EC group.
 
         Example:
@@ -73,13 +77,13 @@ class G1:
             >>> generator + neutral == generator
             True
         """
-        generator = G1.element()
+        generator = cls.new_element()
         _C.g1_get_gen(generator.pt)
         generator._is_gen = True
         return generator
 
-    @staticmethod
-    def get_neutral_element():
+    @classmethod
+    def get_neutral_element(cls):
         """Return the neutral element of the group G1.
         In this case, a point at infinity.
 
@@ -89,13 +93,13 @@ class G1:
             >>> generator + neutral == generator
             True
         """
-        neutral = G1.element()
+        neutral = cls.new_element()
         _C.g1_set_infty(neutral.pt)
         return neutral
 
-    @staticmethod
-    def hash_to_point(hinput):
-        return G1Element.from_hashed_bytes(hinput)
+    @classmethod
+    def hash_to_point(cls, hinput):
+        return cls.element_type().from_hashed_bytes(hinput)
 
     @staticmethod
     def sum(elems):
@@ -134,21 +138,17 @@ class G1Element():
 
     def __copy__(self):
         """Clone an element of G1."""
-        copy = __class__._myself()
+        copy = self.__class__()
         _C.g1_copy(copy.pt, self.pt)
         copy._is_gen = self._is_gen
         return copy
-
-    @staticmethod
-    def _myself():
-        return G1Element()
 
     #
     # Misc
     #
 
-    @staticmethod
-    def from_hashed_bytes(hinput):
+    @classmethod
+    def from_hashed_bytes(cls, hinput):
         """Generate an point on the EC from a hashed byte string.
 
         Example:
@@ -156,7 +156,7 @@ class G1Element():
             >>> elem.is_valid()
             True
         """
-        res = __class__._myself()
+        res = cls()
         _C.g1_map(res.pt, hinput, len(hinput))
         return res
 
@@ -192,7 +192,7 @@ class G1Element():
             >>> elem == 2 * generator
             True
         """
-        res = __class__._myself()
+        res = self.__class__()
         _C.g1_dbl(res.pt, self.pt)
         return res
 
@@ -248,8 +248,8 @@ class G1Element():
     # Serialization
     #
 
-    @staticmethod
-    def from_binary(sbin):
+    @classmethod
+    def from_binary(cls, sbin):
         """Deserialize a binary representation of the element of G1.
 
         Example:
@@ -259,7 +259,7 @@ class G1Element():
             >>> generator == elem
             True
         """
-        elem = __class__._myself()
+        elem = cls()
         elem._is_gen = False
         _C.g1_read_bin(elem.pt, sbin, len(sbin))
         return elem
@@ -286,7 +286,7 @@ class G1Element():
 
     def __neg__(self):
         """Return the inverse of the element of the G1."""
-        res = __class__._myself()
+        res = self.__class__()
         _C.g1_neg(res.pt, self.pt)
         return res
 
@@ -296,14 +296,14 @@ class G1Element():
 
     def __eq__(self, other):
         """Check that the points on the EC are equal."""
-        if not isinstance(other, G1Element):
+        if not isinstance(other, self.__class__):
             return False
 
         return _C.g1_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
 
     def __ne__(self, other):
         """Check that the points on the EC are not equal."""
-        if not isinstance(other, G1Element):
+        if not isinstance(other, self.__class__):
             return True
 
         return _C.g1_cmp(self.pt, other.pt) != _C.CONST_RLC_EQ
@@ -313,12 +313,12 @@ class G1Element():
     #
 
     def __add__(self, other):
-        res = __class__._myself()
+        res = self.__class__()
         _C.g1_add(res.pt, self.pt, other.pt)
         return res
 
     def __radd__(self, other):
-        res = __class__._myself()
+        res = self.__class__()
         _C.g1_add(res.pt, other.pt, self.pt)
         return res
 
@@ -328,12 +328,12 @@ class G1Element():
         return self
 
     def __sub__(self, other):
-        res = __class__._myself()
+        res = self.__class__()
         _C.g1_sub(res.pt, self.pt, other.pt)
         return res
 
     def __rsub__(self, other):
-        res = __class__._myself()
+        res = self.__class__()
         _C.g1_sub(res.pt, other.pt, self.pt)
         return res
 
@@ -344,7 +344,7 @@ class G1Element():
 
     @force_Bn_other
     def __mul__(self, other):
-        res = __class__._myself()
+        res = self.__class__()
         if self._is_gen:
             _C.g1_mul_gen(res.pt, other.bn)
         else:
@@ -353,7 +353,7 @@ class G1Element():
 
     @force_Bn_other
     def __rmul__(self, other):
-        res = __class__._myself()
+        res = self.__class__()
         if self._is_gen:
             _C.g1_mul_gen(res.pt, other.bn)
         else:
@@ -390,8 +390,17 @@ class G1Element():
 class G2:
     """G2 group."""
 
-    @staticmethod
-    def get_order():
+    @classmethod
+    def element_type(cls):
+        return G2Element
+
+    @classmethod
+    def new_element(cls):
+        return cls.element_type()()
+
+
+    @classmethod
+    def get_order(cls):
         """Return the order of the EC group as a Bn large integer.
 
         Example:
@@ -405,8 +414,8 @@ class G2:
         _C.g2_get_ord(order.bn)
         return order
 
-    @staticmethod
-    def get_generator():
+    @classmethod
+    def get_generator(cls):
         """Return generator of the EC group.
 
         Example:
@@ -415,12 +424,12 @@ class G2:
             >>> generator + neutral == generator
             True
         """
-        generator = G2Element()
+        generator = cls.new_element()
         _C.g2_get_gen(generator.pt)
         return generator
 
-    @staticmethod
-    def get_neutral_element():
+    @classmethod
+    def get_neutral_element(cls):
         """Return the neutral element of the group G2.
         In this case, a point at infinity.
 
@@ -430,7 +439,7 @@ class G2:
             >>> generator + neutral == generator
             True
         """
-        neutral = G2Element()
+        neutral = cls.new_element()
         _C.g2_set_infty(neutral.pt)
         return neutral
 
@@ -447,9 +456,9 @@ class G2:
         return res
 
 
-    @staticmethod
-    def hash_to_point(hinput):
-        return G2Element.from_hashed_bytes(hinput)
+    @classmethod
+    def hash_to_point(cls, hinput):
+        return cls.element_type().from_hashed_bytes(hinput)
 
     #
     # Aliases
@@ -474,7 +483,7 @@ class G2Element():
 
     def __copy__(self):
         """Clone an element of G2."""
-        copy = G2Element()
+        copy = self.__class__()
         _C.g2_copy(copy.pt, self.pt)
         return copy
 
@@ -482,8 +491,8 @@ class G2Element():
     # Misc
     #
 
-    @staticmethod
-    def from_hashed_bytes(hinput):
+    @classmethod
+    def from_hashed_bytes(cls, hinput):
         """Generate an point on the EC from a hashed byte string.
 
         Example:
@@ -491,7 +500,7 @@ class G2Element():
             >>> elem.is_valid()
             True
         """
-        res = G2Element()
+        res = cls()
         _C.g2_map(res.pt, hinput, len(hinput))
         return res
 
@@ -527,7 +536,7 @@ class G2Element():
             >>> elem == 2 * generator
             True
         """
-        res = G2Element()
+        res = self.__class__()
         _C.g2_dbl(res.pt, self.pt)
         return res
 
@@ -556,8 +565,8 @@ class G2Element():
     # Serialization
     #
 
-    @staticmethod
-    def from_binary(sbin):
+    @classmethod
+    def from_binary(cls, sbin):
         """Deserialize a binary representation of the element of G2.
 
         Example:
@@ -567,7 +576,7 @@ class G2Element():
             >>> generator == elem
             True
         """
-        elem = G2Element()
+        elem = cls()
         _C.g2_read_bin(elem.pt, sbin, len(sbin))
         return elem
 
@@ -593,7 +602,7 @@ class G2Element():
 
     def __neg__(self):
         """Return the inverse of the element of G2."""
-        res = G2Element()
+        res = self.__class__()
         _C.g2_neg(res.pt, self.pt)
         return res
 
@@ -603,14 +612,14 @@ class G2Element():
 
     def __eq__(self, other):
         """Check that the points on the EC are equal."""
-        if not isinstance(other, G2Element):
+        if not isinstance(other, self.__class__):
             return False
 
         return _C.g2_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
 
     def __ne__(self, other):
         """Check that the points on the EC are not equal."""
-        if not isinstance(other, G2Element):
+        if not isinstance(other, self.__class__):
             return True
 
         return _C.g2_cmp(self.pt, other.pt) != _C.CONST_RLC_EQ
@@ -620,12 +629,12 @@ class G2Element():
     #
 
     def __add__(self, other):
-        res = G2Element()
+        res = self.__class__()
         _C.g2_add(res.pt, self.pt, other.pt)
         return res
 
     def __radd__(self, other):
-        res = G2Element()
+        res = self.__class__()
         _C.g2_add(res.pt, other.pt, self.pt)
         return res
 
@@ -634,12 +643,12 @@ class G2Element():
         return self
 
     def __sub__(self, other):
-        res = G2Element()
+        res = self.__class__()
         _C.g2_sub(res.pt, self.pt, other.pt)
         return res
 
     def __rsub__(self, other):
-        res = G2Element()
+        res = self.__class__()
         _C.g2_sub(res.pt, other.pt, self.pt)
         return res
 
@@ -649,13 +658,13 @@ class G2Element():
 
     @force_Bn_other
     def __mul__(self, other):
-        res = G2Element()
+        res = self.__class__()
         _C.g2_mul(res.pt, self.pt, other.bn)
         return res
 
     @force_Bn_other
     def __rmul__(self, other):
-        res = G2Element()
+        res = self.__class__()
         _C.g2_mul(res.pt, self.pt, other.bn)
         return res
 
@@ -685,8 +694,17 @@ class G2Element():
 class Gt:
     """Gt group."""
 
-    @staticmethod
-    def get_order():
+    @classmethod
+    def element_type(cls):
+        return GtElement
+
+    @classmethod
+    def new_element(cls):
+        return cls.element_type()()
+
+
+    @classmethod
+    def get_order(cls):
         """Return the order of the EC group as a Bn large integer.
 
         Example:
@@ -700,8 +718,8 @@ class Gt:
         _C.gt_get_ord(order.bn)
         return order
 
-    @staticmethod
-    def get_generator():
+    @classmethod
+    def get_generator(cls):
         """Return generator of the EC group.
 
         Example:
@@ -710,12 +728,12 @@ class Gt:
             >>> generator * neutral == generator
             True
         """
-        generator = GtElement()
+        generator = cls.new_element()
         _C.gt_get_gen(generator.pt)
         return generator
 
-    @staticmethod
-    def get_neutral_element():
+    @classmethod
+    def get_neutral_element(cls):
         """Return the neutral element of the group Gt.
         In this case, the unity point.
 
@@ -725,7 +743,7 @@ class Gt:
             >>> generator * neutral == generator
             True
         """
-        neutral = GtElement()
+        neutral = cls.new_element()
         _C.gt_set_unity(neutral.pt)
         return neutral
 
@@ -763,7 +781,7 @@ class GtElement():
 
     def __copy__(self):
         """Clone an element of Gt."""
-        copy = GtElement()
+        copy = self.__class__()
         _C.gt_copy(copy.pt, self.pt)
         return copy
 
@@ -799,7 +817,7 @@ class GtElement():
 
     def inverse(self):
         """Return the inverse of the element of Gt."""
-        res = GtElement()
+        res = self.__class__()
         _C.gt_inv(res.pt, self.pt)
         return res
 
@@ -817,7 +835,7 @@ class GtElement():
             >>> elem == generator ** 2
             True
         """
-        res = GtElement()
+        res = self.__class__()
         _C.gt_sqr(res.pt, self.pt)
         return res
 
@@ -846,8 +864,8 @@ class GtElement():
     # Serialization
     #
 
-    @staticmethod
-    def from_binary(sbin):
+    @classmethod
+    def from_binary(cls, sbin):
         """Deserialize a binary representation of the element of Gt.
 
         Example:
@@ -857,7 +875,7 @@ class GtElement():
             >>> generator == elem
             True
         """
-        ret = GtElement()
+        ret = cls()
         _C.gt_read_bin(ret.pt, sbin, len(sbin))
         return ret
 
@@ -883,14 +901,14 @@ class GtElement():
 
     def __eq__(self, other):
         """Check that the points on the EC are equal."""
-        if not isinstance(other, GtElement):
+        if not isinstance(other, self.__class__):
             return False
 
         return _C.gt_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
 
     def __ne__(self, other):
         """Check that the points on the EC are not equal."""
-        if not isinstance(other, GtElement):
+        if not isinstance(other, self.__class__):
             return True
 
         return _C.gt_cmp(self.pt, other.pt) != _C.CONST_RLC_EQ
@@ -900,12 +918,12 @@ class GtElement():
     #
 
     def __mul__(self, other):
-        res = GtElement()
+        res = self.__class__()
         _C.gt_mul(res.pt, self.pt, other.pt)
         return res
 
     def __rmul__(self, other):
-        res = GtElement()
+        res = self.__class__()
         _C.gt_mul(res.pt, other.pt, self.pt)
         return res
 
@@ -925,7 +943,7 @@ class GtElement():
 
     @force_Bn_other
     def __pow__(self, other):
-        res = GtElement()
+        res = self.__class__()
         exponent = other.mod(Gt.get_order())
         _C.gt_exp(res.pt, self.pt, exponent.bn)
         return res
