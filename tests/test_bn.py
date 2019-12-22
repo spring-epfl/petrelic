@@ -205,3 +205,10 @@ def test_odd():
     assert not Bn(2).is_odd()
 
     assert Bn(100).is_bit_set(Bn(100).num_bits() - 1)
+
+def test_bn_abs():
+    assert abs(Bn(1)) == Bn(1)
+    assert abs(Bn(-1)) == Bn(1)
+
+    assert Bn(5).abs() == Bn(5)
+    assert Bn(-5).abs() == Bn(5)

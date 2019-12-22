@@ -422,6 +422,11 @@ class Bn(object):
         _C.bn_neg(ret.bn, self.bn)
         return ret
 
+    def __abs__(self):
+        ret = Bn()
+        _C.bn_abs(ret.bn, self.bn)
+        return ret
+
     # ------------------ Mod arithmetic -------------------------
 
     @force_Bn(1)
@@ -685,3 +690,6 @@ class Bn(object):
 
     def __hash__(self):
         return int(self).__hash__()
+
+    # Aliases
+    abs = __abs__
