@@ -105,9 +105,9 @@ class G1:
     def sum(elems):
         return sum(elems)
 
-    @staticmethod
-    def wsum(weights, elems):
-        res = G1.get_neutral_element()
+    @classmethod
+    def wsum(cls, weights, elems):
+        res = cls.get_neutral_element()
         for w, el in zip(weights, elems):
             res += w * el
 
@@ -447,9 +447,9 @@ class G2:
     def sum(elems):
         return sum(elems)
 
-    @staticmethod
-    def wsum(weights, elems):
-        res = G2.get_neutral_element()
+    @classmethod
+    def wsum(cls, weights, elems):
+        res = cls.get_neutral_element()
         for w, el in zip(weights, elems):
             res += w * el
 
@@ -748,16 +748,16 @@ class Gt:
         return neutral
 
     @staticmethod
-    def wsum(weights, elems):
-        res = Gt.get_neutral_element()
+    def sum(elems):
+        return sum(elems)
+
+    @classmethod
+    def wsum(cls, weights, elems):
+        res = cls.get_neutral_element()
         for w, el in zip(weights, elems):
             res += w * el
 
         return res
-
-    @staticmethod
-    def sum(elems):
-        return sum(elems)
 
     #
     # Aliases
@@ -944,13 +944,13 @@ class GtElement():
     @force_Bn_other
     def __pow__(self, other):
         res = self.__class__()
-        exponent = other.mod(Gt.get_order())
+        exponent = other.mod(self.group.get_order())
         _C.gt_exp(res.pt, self.pt, exponent.bn)
         return res
 
     @force_Bn_other
     def __ipow__(self, other):
-        exponent = other.mod(Gt.get_order())
+        exponent = other.mod(self.group.get_order())
         _C.gt_exp(self.pt, self.pt, exponent.bn)
         return self
 
