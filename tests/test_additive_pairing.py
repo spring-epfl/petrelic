@@ -188,3 +188,17 @@ def test_ec_bin_translation(group):
         g.from_binary(ept)
     t1 = timer()
     print("\nParsed uncompressed Pt: %2.4f" % (t1 - t0))
+
+def test_wsum_groups(group):
+    g = group.get_generator()
+
+    g1 = 10 * g
+    g2 = 20 * g
+    a1 = Bn(2)
+    a2 = Bn(4)
+
+    s = group.wsum([g1, g2], [a1, a2])
+    assert s == 100 * g
+
+    # Make sure the type is still correct
+    assert s.__class__ == g.__class__
