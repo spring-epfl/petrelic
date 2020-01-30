@@ -8,17 +8,26 @@ The `manylinux1` Docker container rely on the legacy `vsyscall` API from the Lin
 Steps
 -----
 
-Start a VM with Vagrant in the root directory of the git repository, and connect to it.
+* Start a VM with Vagrant in the root directory of the git repository, and connect to it.
+
+```
     vagrant up
     vagrant ssh
+```
 
-Inside the VM, change the working directory to `/host`, and execute the build script.
+* Inside the VM, change the working directory to `/host`, and execute the build script.
+
+```
     cd /host
     bash build.sh
+```
 
-The script will create a temporary directory, download the sources of the dependencies and start a `manylinux1` Docker container. Inside the container, a second script will run to compile the dependencies and build the wheels for the supported Python versions. At the end, the first script will copy the wheels into the `/host` directory they will therefore be available from the host.
+* The script will create a temporary directory, download the sources of the dependencies and start a `manylinux1` Docker container. Inside the container, a second script will run to compile the dependencies and build the wheels for the supported Python versions. At the end, the first script will copy the wheels into the `/host` directory they will therefore be available from the host.
 
-Remains to logout from the vagrant VM and shut it down.
-    $ vagrant halt
+* Remains to logout from the vagrant VM and shut it down.
 
-The wheels are contained in the `wheelhouse` directory.
+```
+    vagrant halt
+```
+
+* The wheels are contained in the `wheelhouse` directory.
