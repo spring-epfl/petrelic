@@ -28,7 +28,19 @@ cp -r /host/wheel/relic /tmp/relic
 cd /tmp/relic
 
 # Custom modifications
-cp "${HOST_MOUNT}/wheel/CMakeLists.txt" .
+sha256sum -c "${HOST_MOUNT}/wheel/sha256sum.txt"
+if [ $? -ne 0 ]
+then
+    echo "WARNING! Relic's CMakeLists.txt has changed since the patch was created." >&2
+fi
+
+patch CMakeLists.txt "${HOST_MOUNT}/wheel/CMakeLists.patch"
+if [ $? -ne 0 ]
+then
+    echo "ERROR! Patch failed to apply." >&2
+    exit 1
+fi
+
 cp "${HOST_MOUNT}/wheel/00custom.sh" preset/00custom.sh
 
 bash preset/00custom.sh -DCMAKE_INSTALL_PREFIX='/usr/local' .
