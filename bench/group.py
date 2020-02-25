@@ -2,7 +2,7 @@ import timeit
 import time
 import secrets
 
-from petrelic.petlib.pairing import G1Group, G2Group, GTGroup
+from petrelic.additive.pairing import G1, G2, Gt
 from petrelic.bn import Bn
 
 # WARNING: If changing from 1000 the results will no longer be in milliseconds
@@ -54,7 +54,7 @@ def bench_group(name, group):
     print("\n")
     print_header("Group " + name)
 
-    print_time("Square", "[p.pt_double() for p in points]")
+    print_time("Square", "[p.double() for p in points]")
 
     print_time("Multiplication", "[p + q for p, q in zip(points, points2)]")
 
@@ -86,8 +86,8 @@ def bench_group(name, group):
 
 
 def bench_pair():
-    group1 = G1Group()
-    group2 = G2Group()
+    group1 = G1()
+    group2 = G2()
     order = group1.order()
 
     global points, points2
@@ -103,7 +103,7 @@ def bench_pair():
 
 
 if __name__ == "__main__":
-    bench_group("G1", G1Group())
-    bench_group("G2", G2Group())
-    # bench_group("GT", GTGroup())
+    bench_group("G1", G1())
+    bench_group("G2", G2())
+    bench_group("GT", Gt())
     bench_pair()
