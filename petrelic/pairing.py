@@ -6,6 +6,17 @@ from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
 
 #
+# Utility function
+#
+def check_same_type(func):
+    def wrapper(a, b):
+        if not type(a) == type(b):
+            return NotImplemented
+        return func(a, b)
+    return wrapper
+
+
+#
 # Exceptions
 #
 
@@ -312,6 +323,7 @@ class G1Element():
     # Binary operators
     #
 
+    @check_same_type
     def __add__(self, other):
         res = self.__class__()
         _C.g1_add(res.pt, self.pt, other.pt)
@@ -322,11 +334,13 @@ class G1Element():
         _C.g1_add(res.pt, other.pt, self.pt)
         return res
 
+    @check_same_type
     def __iadd__(self, other):
         self._is_gen = False
         _C.g1_add(self.pt, self.pt, other.pt)
         return self
 
+    @check_same_type
     def __sub__(self, other):
         res = self.__class__()
         _C.g1_sub(res.pt, self.pt, other.pt)
@@ -337,6 +351,7 @@ class G1Element():
         _C.g1_sub(res.pt, other.pt, self.pt)
         return res
 
+    @check_same_type
     def __isub__(self, other):
         self._is_gen = False
         _C.g1_sub(self.pt, self.pt, other.pt)
@@ -628,30 +643,36 @@ class G2Element():
     # Binary operators
     #
 
+    @check_same_type
     def __add__(self, other):
         res = self.__class__()
         _C.g2_add(res.pt, self.pt, other.pt)
         return res
 
+    @check_same_type
     def __radd__(self, other):
         res = self.__class__()
         _C.g2_add(res.pt, other.pt, self.pt)
         return res
 
+    @check_same_type
     def __iadd__(self, other):
         _C.g2_add(self.pt, self.pt, other.pt)
         return self
 
+    @check_same_type
     def __sub__(self, other):
         res = self.__class__()
         _C.g2_sub(res.pt, self.pt, other.pt)
         return res
 
+    @check_same_type
     def __rsub__(self, other):
         res = self.__class__()
         _C.g2_sub(res.pt, other.pt, self.pt)
         return res
 
+    @check_same_type
     def __isub__(self, other):
         _C.g2_sub(self.pt, self.pt, other.pt)
         return self
@@ -917,25 +938,30 @@ class GtElement():
     # Binary operators
     #
 
+    @check_same_type
     def __mul__(self, other):
         res = self.__class__()
         _C.gt_mul(res.pt, self.pt, other.pt)
         return res
 
     def __rmul__(self, other):
+        # TODO: do we need to implement this?
         res = self.__class__()
         _C.gt_mul(res.pt, other.pt, self.pt)
         return res
 
+    @check_same_type
     def __imul__(self, other):
         _C.gt_mul(self.pt, self.pt, other.pt)
         return self
 
+    @check_same_type
     def __truediv__(self, other):
         res = other.inverse()
         _C.gt_mul(res.pt, self.pt, res.pt)
         return res
 
+    @check_same_type
     def __itruediv__(self, other):
         other_inv = other.inverse()
         _C.gt_mul(self.pt, self.pt, other_inv.pt)

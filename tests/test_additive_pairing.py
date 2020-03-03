@@ -107,6 +107,16 @@ def test_iadd(group):
     assert id(b) == id(a)
 
 
+def test_mul(group):
+    g = group.get_generator()
+    for _ in range(10):
+        a = group.order().random()
+        b = group.order().random()
+        h = a * g
+        k = b * g
+        assert h + k == (a + b) * g
+
+
 def test_double(group):
     """
     Does double() double correctly?
