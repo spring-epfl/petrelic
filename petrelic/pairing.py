@@ -301,6 +301,11 @@ class G1Element():
         _C.g1_neg(res.pt, self.pt)
         return res
 
+    def iinverse(self):
+        """Inplace inverse"""
+        _C.g1_neg(self.pt, self.pt)
+        return self
+
     #
     # Comparison operators
     #
@@ -620,6 +625,11 @@ class G2Element():
         res = self.__class__()
         _C.g2_neg(res.pt, self.pt)
         return res
+
+    def iinverse(self):
+        """Inplace inverse"""
+        _C.g2_neg(self.pt, self.pt)
+        return self
 
     #
     # Comparison operators
