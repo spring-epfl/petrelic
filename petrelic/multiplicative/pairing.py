@@ -89,15 +89,12 @@ class G1Element(basepairing.G1Element):
     isquare = basepairing.G1Element.idouble
 
     __mul__ = basepairing.G1Element.__add__
-    __rmul__ = basepairing.G1Element.__radd__
     __imul__ = basepairing.G1Element.__iadd__
 
     __truediv__ = basepairing.G1Element.__sub__
-    __rtruediv__ = basepairing.G1Element.__rsub__
     __itruediv__ = basepairing.G1Element.__isub__
 
     __pow__ = basepairing.G1Element.__mul__
-    __rpow__ = basepairing.G1Element.__rmul__
     __ipow__ = basepairing.G1Element.__imul__
 
     mul = __mul__
@@ -125,15 +122,12 @@ class G2Element(basepairing.G2Element):
     isquare = basepairing.G2Element.idouble
 
     __mul__ = basepairing.G2Element.__add__
-    __rmul__ = basepairing.G2Element.__radd__
     __imul__ = basepairing.G2Element.__iadd__
 
     __truediv__ = basepairing.G2Element.__sub__
-    __rtruediv__ = basepairing.G2Element.__rsub__
     __itruediv__ = basepairing.G2Element.__isub__
 
     __pow__ = basepairing.G2Element.__mul__
-    __rpow__ = basepairing.G2Element.__rmul__
     __ipow__ = basepairing.G2Element.__imul__
 
     mul = __mul__

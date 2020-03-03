@@ -117,7 +117,6 @@ class GtElement(mulpairing.GtElement):
     idouble = mulpairing.GtElement.isquare
 
     __add__ = mulpairing.GtElement.__mul__
-    __radd__ = mulpairing.GtElement.__rmul__
     __iadd__ = mulpairing.GtElement.__imul__
 
     __sub__ = mulpairing.GtElement.__truediv__
@@ -125,11 +124,6 @@ class GtElement(mulpairing.GtElement):
 
     __mul__ = mulpairing.GtElement.__pow__
     __imul__ = mulpairing.GtElement.__ipow__
-
-    def __rsub__(self, other):
-        res = self.inverse()
-        _C.gt_mul(res.pt, other.pt, res.pt)
-        return res
 
     @force_Bn_other
     def __rmul__(self, other):

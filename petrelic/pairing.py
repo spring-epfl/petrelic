@@ -334,11 +334,6 @@ class G1Element():
         _C.g1_add(res.pt, self.pt, other.pt)
         return res
 
-    def __radd__(self, other):
-        res = self.__class__()
-        _C.g1_add(res.pt, other.pt, self.pt)
-        return res
-
     @check_same_type
     def __iadd__(self, other):
         self._is_gen = False
@@ -349,11 +344,6 @@ class G1Element():
     def __sub__(self, other):
         res = self.__class__()
         _C.g1_sub(res.pt, self.pt, other.pt)
-        return res
-
-    def __rsub__(self, other):
-        res = self.__class__()
-        _C.g1_sub(res.pt, other.pt, self.pt)
         return res
 
     @check_same_type
@@ -660,12 +650,6 @@ class G2Element():
         return res
 
     @check_same_type
-    def __radd__(self, other):
-        res = self.__class__()
-        _C.g2_add(res.pt, other.pt, self.pt)
-        return res
-
-    @check_same_type
     def __iadd__(self, other):
         _C.g2_add(self.pt, self.pt, other.pt)
         return self
@@ -674,12 +658,6 @@ class G2Element():
     def __sub__(self, other):
         res = self.__class__()
         _C.g2_sub(res.pt, self.pt, other.pt)
-        return res
-
-    @check_same_type
-    def __rsub__(self, other):
-        res = self.__class__()
-        _C.g2_sub(res.pt, other.pt, self.pt)
         return res
 
     @check_same_type
@@ -952,12 +930,6 @@ class GtElement():
     def __mul__(self, other):
         res = self.__class__()
         _C.gt_mul(res.pt, self.pt, other.pt)
-        return res
-
-    def __rmul__(self, other):
-        # TODO: do we need to implement this?
-        res = self.__class__()
-        _C.gt_mul(res.pt, other.pt, self.pt)
         return res
 
     @check_same_type
