@@ -56,12 +56,12 @@ class G1:
     """G1 group."""
 
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return G1Element
 
     @classmethod
-    def new_element(cls):
-        return cls.element_type()()
+    def _new_element(cls):
+        return cls._element_type()()
 
     @classmethod
     def get_order(cls):
@@ -88,7 +88,7 @@ class G1:
             >>> generator + neutral == generator
             True
         """
-        generator = cls.new_element()
+        generator = cls._new_element()
         _C.g1_get_gen(generator.pt)
         generator._is_gen = True
         return generator
@@ -104,13 +104,13 @@ class G1:
             >>> generator + neutral == generator
             True
         """
-        neutral = cls.new_element()
+        neutral = cls._new_element()
         _C.g1_set_infty(neutral.pt)
         return neutral
 
     @classmethod
     def hash_to_point(cls, hinput):
-        return cls.element_type().from_hashed_bytes(hinput)
+        return cls._element_type().from_hashed_bytes(hinput)
 
     @staticmethod
     def sum(elems):
@@ -401,12 +401,12 @@ class G2:
     """G2 group."""
 
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return G2Element
 
     @classmethod
-    def new_element(cls):
-        return cls.element_type()()
+    def _new_element(cls):
+        return cls._element_type()()
 
 
     @classmethod
@@ -434,7 +434,7 @@ class G2:
             >>> generator + neutral == generator
             True
         """
-        generator = cls.new_element()
+        generator = cls._new_element()
         _C.g2_get_gen(generator.pt)
         return generator
 
@@ -449,7 +449,7 @@ class G2:
             >>> generator + neutral == generator
             True
         """
-        neutral = cls.new_element()
+        neutral = cls._new_element()
         _C.g2_set_infty(neutral.pt)
         return neutral
 
@@ -468,7 +468,7 @@ class G2:
 
     @classmethod
     def hash_to_point(cls, hinput):
-        return cls.element_type().from_hashed_bytes(hinput)
+        return cls._element_type().from_hashed_bytes(hinput)
 
     #
     # Aliases
@@ -704,12 +704,12 @@ class Gt:
     """Gt group."""
 
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return GtElement
 
     @classmethod
-    def new_element(cls):
-        return cls.element_type()()
+    def _new_element(cls):
+        return cls._element_type()()
 
 
     @classmethod
@@ -737,7 +737,7 @@ class Gt:
             >>> generator * neutral == generator
             True
         """
-        generator = cls.new_element()
+        generator = cls._new_element()
         _C.gt_get_gen(generator.pt)
         return generator
 
@@ -752,7 +752,7 @@ class Gt:
             >>> generator * neutral == generator
             True
         """
-        neutral = cls.new_element()
+        neutral = cls._new_element()
         _C.gt_set_unity(neutral.pt)
         return neutral
 

@@ -37,7 +37,7 @@ class G1(mulpairing.G1):
     """G1 group."""
 
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return G1Element
 
 
@@ -56,7 +56,7 @@ class Gt(mulpairing.Gt):
     """Gt group."""
 
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return GtElement
 
     get_infinity = mulpairing.Gt.get_neutral_element

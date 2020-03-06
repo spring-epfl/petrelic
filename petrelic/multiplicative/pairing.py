@@ -38,7 +38,7 @@ class G1(basepairing.G1):
     """G1 group."""
 
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return G1Element
 
     @classmethod
@@ -109,7 +109,7 @@ class G1Element(basepairing.G1Element):
 
 class G2(basepairing.G2):
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return G2Element
 
 
@@ -144,7 +144,7 @@ class Gt(basepairing.Gt):
     """Gt group."""
 
     @classmethod
-    def element_type(cls):
+    def _element_type(cls):
         return GtElement
 
     get_infinity = basepairing.Gt.get_neutral_element
