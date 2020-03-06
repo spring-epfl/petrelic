@@ -48,11 +48,11 @@ class G1(basepairing.G1):
         In the current implementation this function is not optimized.
 
         Example:
-            >>> elems = [ G1.get_generator() ** x for x in [10, 25, 13]]
-            >>> G1.prod(elems) ==  G1.get_generator() ** (10 + 25 + 13)
+            >>> elems = [ G1.generator() ** x for x in [10, 25, 13]]
+            >>> G1.prod(elems) ==  G1.generator() ** (10 + 25 + 13)
             True
         """
-        res = cls.get_neutral_element()
+        res = cls.neutral_element()
         for el in elems:
             res *= el
         return res
@@ -64,15 +64,17 @@ class G1(basepairing.G1):
         In the current implementation this function is not optimized.
         Example:
             >>> weights = [1, 2, 3]
-            >>> elems = [ G1.get_generator() ** x for x in [10, 25, 13]]
-            >>> G1.wprod(weights, elems) ==  G1.get_generator() ** (1 * 10 + 2 * 25 + 3 * 13)
+            >>> elems = [ G1.generator() ** x for x in [10, 25, 13]]
+            >>> G1.wprod(weights, elems) ==  G1.generator() ** (1 * 10 + 2 * 25 + 3 * 13)
             True
         """
-        res = cls.get_neutral_element()
+        res = cls.neutral_element()
         for w, el in zip(weights, elems):
             res *= el ** w
 
         return res
+
+    unity = basepairing.G1.neutral_element
 
 
 class G1Element(basepairing.G1Element):
@@ -112,6 +114,8 @@ class G2(basepairing.G2):
     def _element_type(cls):
         return G2Element
 
+    unity = basepairing.G2.neutral_element
+
 
 class G2Element(basepairing.G2Element):
     """Element of the G2 group."""
@@ -140,15 +144,13 @@ class G2Element(basepairing.G2Element):
     ipow = __ipow__
 
 
+
 class Gt(basepairing.Gt):
     """Gt group."""
 
     @classmethod
     def _element_type(cls):
         return GtElement
-
-    get_infinity = basepairing.Gt.get_neutral_element
-    infinite = basepairing.Gt.get_neutral_element
 
 
 class GtElement(basepairing.GtElement):

@@ -59,8 +59,7 @@ class Gt(mulpairing.Gt):
     def _element_type(cls):
         return GtElement
 
-    get_infinity = mulpairing.Gt.get_neutral_element
-    infinite = mulpairing.Gt.get_neutral_element
+    infinity = mulpairing.Gt.neutral_element
 
 
 class GtElement(mulpairing.GtElement):
@@ -77,7 +76,7 @@ class GtElement(mulpairing.GtElement):
         """Return an element which is the double of the current one.
 
         Example:
-            >>> generator = Gt.get_generator()
+            >>> generator = Gt.generator()
             >>> elem = generator.double()
             >>> elem == generator * 2
             True
@@ -90,8 +89,8 @@ class GtElement(mulpairing.GtElement):
         """Double the current element.
 
         Example:
-            >>> generator = Gt.get_generator()
-            >>> elem = Gt.get_generator().idouble()
+            >>> generator = Gt.generator()
+            >>> elem = Gt.generator().idouble()
             >>> elem == generator * 2
             True
         """
@@ -128,7 +127,7 @@ class GtElement(mulpairing.GtElement):
     @force_Bn_other
     def __rmul__(self, other):
         res = GtElement()
-        exponent = other.mod(Gt.get_order())
+        exponent = other.mod(Gt.order())
         _C.gt_exp(res.pt, self.pt, exponent.bn)
         return res
 

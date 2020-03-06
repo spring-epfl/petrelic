@@ -64,13 +64,13 @@ class G1:
         return cls._element_type()()
 
     @classmethod
-    def get_order(cls):
+    def order(cls):
         """Return the order of the EC group as a Bn large integer.
 
         Example:
-            >>> generator = G1.get_generator()
-            >>> neutral = G1.get_neutral_element()
-            >>> order = G1.get_order()
+            >>> generator = G1.generator()
+            >>> neutral = G1.neutral_element()
+            >>> order = G1.order()
             >>> order * generator == neutral
             True
         """
@@ -79,12 +79,12 @@ class G1:
         return order
 
     @classmethod
-    def get_generator(cls):
+    def generator(cls):
         """Return generator of the EC group.
 
         Example:
-            >>> generator = G1.get_generator()
-            >>> neutral = G1.get_neutral_element()
+            >>> generator = G1.generator()
+            >>> neutral = G1.neutral_element()
             >>> generator + neutral == generator
             True
         """
@@ -94,13 +94,13 @@ class G1:
         return generator
 
     @classmethod
-    def get_neutral_element(cls):
+    def neutral_element(cls):
         """Return the neutral element of the group G1.
         In this case, a point at infinity.
 
         Example:
-            >>> generator = G1.get_generator()
-            >>> neutral = G1.get_neutral_element()
+            >>> generator = G1.generator()
+            >>> neutral = G1.neutral_element()
             >>> generator + neutral == generator
             True
         """
@@ -129,10 +129,7 @@ class G1:
     # Aliases
     #
 
-    get_infinity = get_neutral_element
-    infinite = get_neutral_element
-    generator = get_generator
-    order = get_order
+    infinity = neutral_element
 
 
 class G1Element():
@@ -185,8 +182,8 @@ class G1Element():
         """Check if the object is the neutral element of G1.
 
         Example:
-            >>> generator = G1.get_generator()
-            >>> order = G1.get_order()
+            >>> generator = G1.generator()
+            >>> order = G1.order()
             >>> elem = order * generator
             >>> elem.is_neutral_element()
             True
@@ -198,7 +195,7 @@ class G1Element():
         """Return an element which is the double of the current one.
 
         Example:
-            >>> generator = G1.get_generator()
+            >>> generator = G1.generator()
             >>> elem = generator.double()
             >>> elem == 2 * generator
             True
@@ -211,8 +208,9 @@ class G1Element():
         """Double the current element.
 
         Example:
-            >>> generator = G1.get_generator()
-            >>> elem = G1.get_generator().idouble()
+            >>> generator = G1.generator()
+            >>> elem = G1.generator()
+            >>> _ = elem.idouble()
             >>> elem == 2 * generator
             True
         """
@@ -224,7 +222,7 @@ class G1Element():
         """Return the affine coordinates (x,y) of this EC Point.
 
         Example:
-            >>> generator = G1.get_generator()
+            >>> generator = G1.generator()
             >>> x, y = generator.get_affine_coordinates()
             >>> x
             Bn(3685416753713387016781088315183077757961620795782546409894578378688607592378376318836054947676345821548104185464507)
@@ -264,7 +262,7 @@ class G1Element():
         """Deserialize a binary representation of the element of G1.
 
         Example:
-            >>> generator = G1.get_generator()
+            >>> generator = G1.generator()
             >>> bin_repr = generator.to_binary()
             >>> elem = G1Element.from_binary(bin_repr)
             >>> generator == elem
@@ -279,7 +277,7 @@ class G1Element():
         """Serialize the element of G1 into a binary representation.
 
         Example:
-            >>> generator = G1.get_generator()
+            >>> generator = G1.generator()
             >>> bin_repr = generator.to_binary()
             >>> elem = G1Element.from_binary(bin_repr)
             >>> generator == elem
@@ -410,13 +408,13 @@ class G2:
 
 
     @classmethod
-    def get_order(cls):
+    def order(cls):
         """Return the order of the EC group as a Bn large integer.
 
         Example:
-            >>> generator = G2.get_generator()
-            >>> neutral = G2.get_neutral_element()
-            >>> order = G2.get_order()
+            >>> generator = G2.generator()
+            >>> neutral = G2.neutral_element()
+            >>> order = G2.order()
             >>> order * generator == neutral
             True
         """
@@ -425,12 +423,12 @@ class G2:
         return order
 
     @classmethod
-    def get_generator(cls):
+    def generator(cls):
         """Return generator of the EC group.
 
         Example:
-            >>> generator = G2.get_generator()
-            >>> neutral = G2.get_neutral_element()
+            >>> generator = G2.generator()
+            >>> neutral = G2.neutral_element()
             >>> generator + neutral == generator
             True
         """
@@ -439,13 +437,13 @@ class G2:
         return generator
 
     @classmethod
-    def get_neutral_element(cls):
+    def neutral_element(cls):
         """Return the neutral element of the group G2.
         In this case, a point at infinity.
 
         Example:
-            >>> generator = G2.get_generator()
-            >>> neutral = G2.get_neutral_element()
+            >>> generator = G2.generator()
+            >>> neutral = G2.neutral_element()
             >>> generator + neutral == generator
             True
         """
@@ -459,7 +457,7 @@ class G2:
 
     @classmethod
     def wsum(cls, weights, elems):
-        res = cls.get_neutral_element()
+        res = cls.neutral_element()
         for w, el in zip(weights, elems):
             res += w * el
 
@@ -474,10 +472,7 @@ class G2:
     # Aliases
     #
 
-    get_infinity = get_neutral_element
-    infinite = get_neutral_element
-    generator = get_generator
-    order = get_order
+    infinity = neutral_element
 
 
 class G2Element():
@@ -528,8 +523,8 @@ class G2Element():
         """Check if the object is the neutral element of G2.
 
         Example:
-            >>> generator = G2.get_generator()
-            >>> order = G2.get_order()
+            >>> generator = G2.generator()
+            >>> order = G2.order()
             >>> elem = order * generator
             >>> elem.is_neutral_element()
             True
@@ -541,7 +536,7 @@ class G2Element():
         """Return an element which is the double of the current one.
 
         Example:
-            >>> generator = G2.get_generator()
+            >>> generator = G2.generator()
             >>> elem = generator.double()
             >>> elem == 2 * generator
             True
@@ -554,8 +549,8 @@ class G2Element():
         """Double the current element.
 
         Example:
-            >>> generator = G2.get_generator()
-            >>> elem = G2.get_generator().idouble()
+            >>> generator = G2.generator()
+            >>> elem = G2.generator().idouble()
             >>> elem == 2 * generator
             True
         """
@@ -580,7 +575,7 @@ class G2Element():
         """Deserialize a binary representation of the element of G2.
 
         Example:
-            >>> generator = G2.get_generator()
+            >>> generator = G2.generator()
             >>> bin_repr = generator.to_binary()
             >>> elem = G2Element.from_binary(bin_repr)
             >>> generator == elem
@@ -594,7 +589,7 @@ class G2Element():
         """Serialize the element of G2 into a binary representation.
 
         Example:
-            >>> generator = G2.get_generator()
+            >>> generator = G2.generator()
             >>> bin_repr = generator.to_binary()
             >>> elem = G2Element.from_binary(bin_repr)
             >>> generator == elem
@@ -713,13 +708,13 @@ class Gt:
 
 
     @classmethod
-    def get_order(cls):
+    def order(cls):
         """Return the order of the EC group as a Bn large integer.
 
         Example:
-            >>> generator = Gt.get_generator()
-            >>> neutral = Gt.get_neutral_element()
-            >>> order = Gt.get_order()
+            >>> generator = Gt.generator()
+            >>> neutral = Gt.neutral_element()
+            >>> order = Gt.order()
             >>> generator ** order == neutral
             True
         """
@@ -728,12 +723,12 @@ class Gt:
         return order
 
     @classmethod
-    def get_generator(cls):
+    def generator(cls):
         """Return generator of the EC group.
 
         Example:
-            >>> generator = Gt.get_generator()
-            >>> neutral = Gt.get_neutral_element()
+            >>> generator = Gt.generator()
+            >>> neutral = Gt.neutral_element()
             >>> generator * neutral == generator
             True
         """
@@ -742,13 +737,13 @@ class Gt:
         return generator
 
     @classmethod
-    def get_neutral_element(cls):
+    def neutral_element(cls):
         """Return the neutral element of the group Gt.
         In this case, the unity point.
 
         Example:
-            >>> generator = Gt.get_generator()
-            >>> neutral = Gt.get_neutral_element()
+            >>> generator = Gt.generator()
+            >>> neutral = Gt.neutral_element()
             >>> generator * neutral == generator
             True
         """
@@ -762,7 +757,7 @@ class Gt:
 
     @classmethod
     def wsum(cls, weights, elems):
-        res = cls.get_neutral_element()
+        res = cls.neutral_element()
         for w, el in zip(weights, elems):
             res += w * el
 
@@ -772,9 +767,7 @@ class Gt:
     # Aliases
     #
 
-    get_unity = get_neutral_element
-    generator = get_generator
-    order = get_order
+    get_unity = neutral_element
 
 
 class GtElement():
@@ -802,7 +795,7 @@ class GtElement():
         """Check if the data of this object is indeed a point on the EC.
 
         Example:
-            >>> elem = Gt.get_generator()
+            >>> elem = Gt.generator()
             >>> elem.is_valid()
             True
         """
@@ -816,8 +809,8 @@ class GtElement():
         """Check if the object is the neutral element of Gt.
 
         Example:
-            >>> generator = Gt.get_generator()
-            >>> order = Gt.get_order()
+            >>> generator = Gt.generator()
+            >>> order = Gt.order()
             >>> elem = generator ** order
             >>> elem.is_neutral_element()
             True
@@ -839,7 +832,7 @@ class GtElement():
         """Return an element which is the square of the current one.
 
         Example:
-            >>> generator = Gt.get_generator()
+            >>> generator = Gt.generator()
             >>> elem = generator.square()
             >>> elem == generator ** 2
             True
@@ -852,8 +845,8 @@ class GtElement():
         """Double the current element.
 
         Example:
-            >>> generator = Gt.get_generator()
-            >>> elem = Gt.get_generator().isquare()
+            >>> generator = Gt.generator()
+            >>> elem = Gt.generator().isquare()
             >>> elem == generator ** 2
             True
         """
@@ -878,7 +871,7 @@ class GtElement():
         """Deserialize a binary representation of the element of Gt.
 
         Example:
-            >>> generator = Gt.get_generator()
+            >>> generator = Gt.generator()
             >>> bin_repr = generator.to_binary()
             >>> elem = GtElement.from_binary(bin_repr)
             >>> generator == elem
@@ -892,7 +885,7 @@ class GtElement():
         """Serialize the element of Gt into a binary representation.
 
         Example:
-            >>> generator = Gt.get_generator()
+            >>> generator = Gt.generator()
             >>> bin_repr = generator.to_binary()
             >>> elem = GtElement.from_binary(bin_repr)
             >>> generator == elem
@@ -952,13 +945,13 @@ class GtElement():
     @force_Bn_other
     def __pow__(self, other):
         res = self.__class__()
-        exponent = other.mod(self.group.get_order())
+        exponent = other.mod(self.group.order())
         _C.gt_exp(res.pt, self.pt, exponent.bn)
         return res
 
     @force_Bn_other
     def __ipow__(self, other):
-        exponent = other.mod(self.group.get_order())
+        exponent = other.mod(self.group.order())
         _C.gt_exp(self.pt, self.pt, exponent.bn)
         return self
 

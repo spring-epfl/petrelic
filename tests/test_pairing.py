@@ -13,13 +13,13 @@ def element(request):
     return request.param
 
 def test_is_valid(group):
-    assert group.get_generator().is_valid()
-    assert (100 * group.get_generator()).is_valid()
+    assert group.generator().is_valid()
+    assert (100 * group.generator()).is_valid()
 
 
 def test_is_valid_gt():
-    assert Gt.get_generator().is_valid()
-    assert (Gt.get_generator() ** 100).is_valid()
+    assert Gt.generator().is_valid()
+    assert (Gt.generator() ** 100).is_valid()
 
 
 def test_from_hashed_bytes(element):
@@ -32,7 +32,7 @@ def test_from_hashed_bytes(element):
 
 @pytest.mark.skip(reason="not planning to implement this for now")
 def test_ec_from_x(group):
-    g = group.get_generator()
+    g = group.generator()
     x, y = g.get_affine_coordinates()
 
     g1, g2 = group.get_points_from_x(x)
@@ -40,14 +40,14 @@ def test_ec_from_x(group):
 
 
 def test_ec_arithmetic(group):
-    g = group.get_generator()
+    g = group.generator()
     assert g + g == g + g
     assert g + g == g.double()
     assert g + g == Bn(2) * g
     assert g + g == 2 * g
 
     assert g + g != g + g + g
-    assert g + (-g) == group.get_neutral_element()
+    assert g + (-g) == group.neutral_element()
     d = {}
     d[2 * g] = 2
     assert d[2 * g] == 2
@@ -62,7 +62,7 @@ def test_ec_arithmetic(group):
 
 
 def test_gt_multiplication():
-    g = Gt.get_generator()
+    g = Gt.generator()
     assert g * g == g * g
     assert g * g == g.square()
     assert g * g == g ** Bn(2)
@@ -73,23 +73,23 @@ def test_gt_multiplication():
 
 
 def test_gt_neutral_element():
-    g = Gt.get_generator()
-    neutral_element = Gt.get_neutral_element()
+    g = Gt.generator()
+    neutral_element = Gt.neutral_element()
 
     assert g * neutral_element == g
     assert neutral_element * neutral_element == neutral_element
 
 
 def test_gt_inverse():
-    g = Gt.get_generator()
+    g = Gt.generator()
     elem = g ** 1337
 
-    assert elem * elem.inverse() == Gt.get_neutral_element()
+    assert elem * elem.inverse() == Gt.neutral_element()
     assert elem.inverse() == elem ** (-1)
 
 
 def test_gt_exponentiation():
-    g = Gt.get_generator()
+    g = Gt.generator()
 
     assert g ** 3 == g * g * g
     assert g ** (-1) == g.inverse()
@@ -98,18 +98,18 @@ def test_gt_exponentiation():
 
 
 def test_g1_get_affine_coordinates():
-    g = G1.get_generator()
+    g = G1.generator()
     x, y = g.get_affine_coordinates()
 
 
 def test_g1_export_length():
-    g = G1.get_generator()
+    g = G1.generator()
     assert len(g.to_binary()) == 49
 
 
 def test_ec_binary_encoding(group):
-    g = group.get_generator()
-    i = group.get_neutral_element()
+    g = group.generator()
+    i = group.neutral_element()
 
     assert len(i.to_binary()) == 1
     assert g.from_binary(g.to_binary()) == g
@@ -117,8 +117,8 @@ def test_ec_binary_encoding(group):
 
 
 def test_gt_binary_encoding(group):
-    g = Gt.get_generator()
-    i = Gt.get_neutral_element()
+    g = Gt.generator()
+    i = Gt.neutral_element()
 
     assert GtElement.from_binary(g.to_binary()) == g
     assert GtElement.from_binary(i.to_binary()) == i
@@ -126,20 +126,20 @@ def test_gt_binary_encoding(group):
 
 @pytest.mark.skip(reason="not planning to implement this for now")
 def test_ec_sum(group):
-    g = group.get_generator()
+    g = group.generator()
     assert group.sum([g] * 10) == (10 * g)
 
-    order = group.get_order()
+    order = group.order()
     h = order.random() * g
     assert group.wsum([Bn(10), Bn(20)], [g, h]) == 10 * g + 20 * h
 
 
 @pytest.mark.skip(reason="not planning to implement this for now")
 def test_gt_prod():
-    g = Gt.get_generator()
+    g = Gt.generator()
     assert group.prod([g] * 10) == (g ** 10)
 
-    order = Gt.get_order()
+    order = Gt.order()
     h = g ** order.random()
     assert group.wprod([Bn(10), Bn(20)], [g, h]) == g ** 10 * h ** 20
 
@@ -148,23 +148,23 @@ def test_iadd(group):
     """
     Does pt_add_inplace add correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = g + g
     g += g
     assert a == g
 
     # Does it save the result in the same memory location?
 
-    a = group.get_generator()
+    a = group.generator()
     b = a
     a += a
     assert id(b) == id(a)
 
 
 def test_imul():
-    g = Gt.get_generator()
+    g = Gt.generator()
     a = g * g
-    b = Gt.get_generator()
+    b = Gt.generator()
     b *= g
     assert a == b
 
@@ -173,13 +173,13 @@ def test_double(group):
     """
     Does double() double correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = g.double()
     g.idouble()
     assert a == g
 
     # Does it save the result in the same memory location?
-    a = group.get_generator()
+    a = group.generator()
     b = a
     a.idouble()
     assert id(b) == id(a)
@@ -189,15 +189,15 @@ def test_square():
     """
     Does square() square correctly?
     """
-    g = Gt.get_generator()
+    g = Gt.generator()
     a = g.square()
-    b = Gt.get_generator()
+    b = Gt.generator()
     b.isquare()
     assert a == b
 
     # Does it save the result in the same memory location?
 
-    a = Gt.get_generator()
+    a = Gt.generator()
     b = a
     a.isquare()
     assert id(b) == id(a)
@@ -207,26 +207,26 @@ def test_imul(group):
     """
     Does imul multiply correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = g.mul(5)
     g *= 5
     assert a == g
 
     # Does it save the result in the same memory location?
 
-    a = group.get_generator()
+    a = group.generator()
     b = a
     a *= 5
     assert id(b) == id(a)
 
 
 def test_iexp():
-    g = Gt.get_generator()
+    g = Gt.generator()
     a = g ** 100
     g **= 100
     assert a == g
 
-    a = Gt.get_generator()
+    a = Gt.generator()
     b = a
     a **= 10
     assert id(b) == id(a)
@@ -236,7 +236,7 @@ def test_neg(group):
     """
     Does neg negate correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = -g
     assert -a == g
 
@@ -245,12 +245,12 @@ def test_neg(group):
 
 
 def test_inverse():
-    g = Gt.get_generator()
+    g = Gt.generator()
     a = g.inverse()
     g.iinverse()
     assert a == g
 
-    a = Gt.get_generator()
+    a = Gt.generator()
     b = a
     a.iinverse()
     assert id(b) == id(a)
@@ -258,7 +258,7 @@ def test_inverse():
 
 def test_g1_affine_inf():
     group = G1()
-    inf = group.get_neutral_element()
+    inf = group.neutral_element()
 
     with pytest.raises(NoAffineCoordinateForECPoint) as ex:
         inf.get_affine_coordinates()
@@ -267,8 +267,8 @@ def test_g1_affine_inf():
 def test_ec_bin_translation(group):
     from timeit import default_timer as timer
 
-    o = group.get_order()
-    g = group.get_generator()
+    o = group.order()
+    g = group.generator()
     pt1000 = [o.random() * g for _ in range(1000)]
 
     exp = []
@@ -295,8 +295,8 @@ def test_ec_bin_translation(group):
 
 
 def test_gt_bin_translation():
-    g = Gt.get_generator()
-    o = Gt.get_order()
+    g = Gt.generator()
+    o = Gt.order()
 
     a = o.random()
     elem = g ** a

@@ -14,7 +14,7 @@ from petrelic.bn import Bn
 
 @pytest.fixture(params=[G1, G2, Gt])
 def generator(request):
-    return request.param.get_generator()
+    return request.param.generator()
 
 
 @pytest.fixture(params=[G1, G2, Gt])
@@ -28,9 +28,9 @@ def element(request):
 
 
 def test_order(group):
-    g = group.get_generator()
+    g = group.generator()
     o = group.order()
-    assert g ** o == group.get_neutral_element()
+    assert g ** o == group.neutral_element()
 
 
 def test_square_small(generator):
@@ -47,14 +47,14 @@ def test_square_small(generator):
 
 
 def test_square_random(group):
-    g = group.get_generator()
+    g = group.generator()
     a = group.order().random()
     h = g ** a
     assert h.square() == g ** (2 * a)
 
 
 def test_isquare_random(group):
-    g = group.get_generator()
+    g = group.generator()
     a = group.order().random()
     h = g ** a
     h.isquare()
@@ -62,7 +62,7 @@ def test_isquare_random(group):
 
 
 def test_mul_random(group):
-    g = group.get_generator()
+    g = group.generator()
     a = group.order().random()
     b = group.order().random()
     h = g ** a
@@ -71,7 +71,7 @@ def test_mul_random(group):
 
 
 def test_mul_large(group):
-    g = group.get_generator()
+    g = group.generator()
     a = group.order() - 1
     b = group.order() - 2
     h = g ** a
@@ -80,9 +80,9 @@ def test_mul_large(group):
 
 
 def test_imul(group):
-    g = group.get_generator()
-    a = group.get_order().random()
-    b = group.get_order().random()
+    g = group.generator()
+    a = group.order().random()
+    b = group.order().random()
     h = g ** a
     k = g ** b
     assert h * k == g ** (a + b)
@@ -91,44 +91,44 @@ def test_imul(group):
 
 
 def test_mul_pow(group):
-    g = group.get_generator()
+    g = group.generator()
     assert g * g == g ** 2
 
-    h = g ** group.get_order().random()
+    h = g ** group.order().random()
     assert h * h * h == h ** 3
 
 
 def test_pow_identity(group):
-    g = group.get_generator()
-    assert group.get_neutral_element() == g ** 0
+    g = group.generator()
+    assert group.neutral_element() == g ** 0
 
 
 def test_pow_inverse(group):
-    g = group.get_generator()
+    g = group.generator()
     ginv = g.inverse()
     assert ginv == g ** (-1)
 
 
 def test_mul_different_type(group):
-    g = group.get_generator()
+    g = group.generator()
     o = group.order()
     with pytest.raises(TypeError):
         g * o
 
 
 def test_inverse(group):
-    g = group.get_generator()
+    g = group.generator()
     a = group.order().random()
     h = g ** a
 
-    assert h.inverse() == group.get_neutral_element() / h
+    assert h.inverse() == group.neutral_element() / h
 
     hinv = g ** (group.order() - a)
     assert h.inverse() == hinv
 
 
 def test_iinverse(group):
-    g = group.get_generator()
+    g = group.generator()
     a = group.order().random()
     h = g ** a
     hinv = g ** (group.order() - a)

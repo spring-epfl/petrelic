@@ -14,8 +14,8 @@ def element(request):
 
 
 def test_is_valid(group):
-    assert group.get_generator().is_valid()
-    assert (100 * group.get_generator()).is_valid()
+    assert group.generator().is_valid()
+    assert (100 * group.generator()).is_valid()
 
 
 def test_from_hashed_bytes(element):
@@ -28,7 +28,7 @@ def test_from_hashed_bytes(element):
 
 @pytest.mark.skip(reason="not planning to implement this for now")
 def test_ec_from_x(group):
-    g = group.get_generator()
+    g = group.generator()
     x, y = g.get_affine_coordinates()
 
     g1, g2 = group.get_points_from_x(x)
@@ -36,14 +36,14 @@ def test_ec_from_x(group):
 
 
 def test_ec_arithmetic(group):
-    g = group.get_generator()
+    g = group.generator()
     assert g + g == g + g
     assert g + g == g.double()
     assert g + g == Bn(2) * g
     assert g + g == 2 * g
 
     assert g + g != g + g + g
-    assert g + (-g) == group.get_neutral_element()
+    assert g + (-g) == group.neutral_element()
     d = {}
     d[2 * g] = 2
     assert d[2 * g] == 2
@@ -56,25 +56,25 @@ def test_ec_arithmetic(group):
 
     assert len(str(g)) > 0
 
-    neutral_element = group.get_neutral_element()
+    neutral_element = group.neutral_element()
 
     assert g + neutral_element == g
     assert neutral_element + neutral_element == neutral_element
 
 
 def test_g1_get_affine_coordinates():
-    g = G1.get_generator()
+    g = G1.generator()
     x, y = g.get_affine_coordinates()
 
 
 def test_g1_export_length():
-    g = G1.get_generator()
+    g = G1.generator()
     assert len(g.to_binary()) == 49
 
 
 def test_ec_binary_encoding(group):
-    g = group.get_generator()
-    i = group.get_neutral_element()
+    g = group.generator()
+    i = group.neutral_element()
 
     assert g.from_binary(g.to_binary()) == g
     assert g.from_binary(i.to_binary()) == i
@@ -82,10 +82,10 @@ def test_ec_binary_encoding(group):
 
 @pytest.mark.skip(reason="not planning to implement this for now")
 def test_ec_sum(group):
-    g = group.get_generator()
+    g = group.generator()
     assert group.sum([g] * 10) == (10 * g)
 
-    order = group.get_order()
+    order = group.order()
     h = order.random() * g
     assert group.wsum([Bn(10), Bn(20)], [g, h]) == 10 * g + 20 * h
 
@@ -94,21 +94,21 @@ def test_iadd(group):
     """
     Does pt_add_inplace add correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = g + g
     g += g
     assert a == g
 
     # Does it save the result in the same memory location?
 
-    a = group.get_generator()
+    a = group.generator()
     b = a
     a += a
     assert id(b) == id(a)
 
 
 def test_mul(group):
-    g = group.get_generator()
+    g = group.generator()
     for _ in range(10):
         a = group.order().random()
         b = group.order().random()
@@ -121,13 +121,13 @@ def test_double(group):
     """
     Does double() double correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = g.double()
     g.idouble()
     assert a == g
 
     # Does it save the result in the same memory location?
-    a = group.get_generator()
+    a = group.generator()
     b = a
     a.idouble()
     assert id(b) == id(a)
@@ -137,14 +137,14 @@ def test_imul(group):
     """
     Does imul multiply correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = g.mul(5)
     g *= 5
     assert a == g
 
     # Does it save the result in the same memory location?
 
-    a = group.get_generator()
+    a = group.generator()
     b = a
     a *= 5
     assert id(b) == id(a)
@@ -154,7 +154,7 @@ def test_neg(group):
     """
     Does neg negate correctly?
     """
-    g = group.get_generator()
+    g = group.generator()
     a = -g
     assert -a == g
 
@@ -164,7 +164,7 @@ def test_neg(group):
 
 def test_g1_affine_inf():
     group = G1()
-    inf = group.get_neutral_element()
+    inf = group.neutral_element()
 
     with pytest.raises(NoAffineCoordinateForECPoint) as ex:
         inf.get_affine_coordinates()
@@ -173,8 +173,8 @@ def test_g1_affine_inf():
 def test_ec_bin_translation(group):
     from timeit import default_timer as timer
 
-    o = group.get_order()
-    g = group.get_generator()
+    o = group.order()
+    g = group.generator()
     pt1000 = [o.random() * g for _ in range(1000)]
 
     exp = []
@@ -200,7 +200,7 @@ def test_ec_bin_translation(group):
     print("\nParsed uncompressed Pt: %2.4f" % (t1 - t0))
 
 def test_wsum_groups(group):
-    g = group.get_generator()
+    g = group.generator()
 
     g1 = 10 * g
     g2 = 20 * g
