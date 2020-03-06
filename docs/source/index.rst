@@ -27,7 +27,8 @@ Welcome to Petrelic's documentation!
    :maxdepth: 2
    :caption: Reference
 
-   petrelic
+   petrelic.bn
+   petrelic.native.pairing
    petrelic.additive
    petrelic.petlib
 

@@ -10,7 +10,7 @@ petrelic.additive.pairing module
 .. automodule:: petrelic.additive.pairing
     :members:
     :undoc-members:
-    :show-inheritance:
+    :inherited-members:
 
 
 Module contents
