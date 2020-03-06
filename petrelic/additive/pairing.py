@@ -59,6 +59,41 @@ class Gt(mulpairing.Gt):
     def _element_type(cls):
         return GtElement
 
+    @classmethod
+    def sum(cls, elems):
+        """Efficient sum of a number of elements
+
+        In the current implementation this function is not optimized.
+
+        Example:
+            >>> elems = [ x * Gt.generator() for x in [10, 25, 13]]
+            >>> Gt.sum(elems) ==  (10 + 25 + 13) * Gt.generator()
+            True
+        """
+        res = cls.neutral_element()
+        for el in elems:
+            res += el
+
+        return res
+
+    @classmethod
+    def wsum(cls, weights, elems):
+        """Efficient weighted product of a number of elements
+
+        In the current implementation this function is not optimized.
+
+        Example:
+            >>> weights = [1, 2, 3]
+            >>> elems = [ x * Gt.generator() for x in [10, 25, 13]]
+            >>> Gt.wsum(weights, elems) ==  (1 * 10 + 2 * 25 + 3 * 13) * Gt.generator()
+            True
+        """
+        res = cls.neutral_element()
+        for w, el in zip(weights, elems):
+            res += w * el
+
+        return res
+
     infinity = mulpairing.Gt.neutral_element
 
 

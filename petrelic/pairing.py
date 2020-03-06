@@ -121,10 +121,36 @@ class G1:
         _C.g1_map(res.pt, hinput, len(hinput))
         return res
 
+    @classmethod
+    def sum(cls, elems):
+        """Efficient sum of a number of elements
+
+        In the current implementation this function is not optimized.
+
+        Example:
+            >>> elems = [ x * G1.generator() for x in [10, 25, 13]]
+            >>> G1.sum(elems) ==  (10 + 25 + 13) * G1.generator()
+            True
+        """
+        res = cls.neutral_element()
+        for el in elems:
+            res += el
+
+        return res
 
     @classmethod
     def wsum(cls, weights, elems):
-        res = cls.get_neutral_element()
+        """Efficient weighted product of a number of elements
+
+        In the current implementation this function is not optimized.
+
+        Example:
+            >>> weights = [1, 2, 3]
+            >>> elems = [ x * G1.generator() for x in [10, 25, 13]]
+            >>> G1.wsum(weights, elems) ==  (1 * 10 + 2 * 25 + 3 * 13) * G1.generator()
+            True
+        """
+        res = cls.neutral_element()
         for w, el in zip(weights, elems):
             res += w * el
 
@@ -444,18 +470,40 @@ class G2:
         _C.g2_set_infty(neutral.pt)
         return neutral
 
-    @staticmethod
-    def sum(elems):
-        return sum(elems)
+    @classmethod
+    def sum(cls, elems):
+        """Efficient sum of a number of elements
+
+        In the current implementation this function is not optimized.
+
+        Example:
+            >>> elems = [ x * G2.generator() for x in [10, 25, 13]]
+            >>> G2.sum(elems) ==  (10 + 25 + 13) * G2.generator()
+            True
+        """
+        res = cls.neutral_element()
+        for el in elems:
+            res += el
+
+        return res
 
     @classmethod
     def wsum(cls, weights, elems):
+        """Efficient weighted product of a number of elements
+
+        In the current implementation this function is not optimized.
+
+        Example:
+            >>> weights = [1, 2, 3]
+            >>> elems = [ x * G2.generator() for x in [10, 25, 13]]
+            >>> G2.wsum(weights, elems) ==  (1 * 10 + 2 * 25 + 3 * 13) * G2.generator()
+            True
+        """
         res = cls.neutral_element()
         for w, el in zip(weights, elems):
             res += w * el
 
         return res
-
 
     @classmethod
     def hash_to_point(cls, hinput):
@@ -744,15 +792,36 @@ class Gt:
         _C.gt_set_unity(neutral.pt)
         return neutral
 
-    @staticmethod
-    def sum(elems):
-        return sum(elems)
+    @classmethod
+    def prod(cls, elems):
+        """Efficient product of a number of elements
+
+        In the current implementation this function is not optimized.
+
+        Example:
+            >>> elems = [ Gt.generator() ** x for x in [10, 25, 13]]
+            >>> Gt.prod(elems) ==  Gt.generator() ** (10 + 25 + 13)
+            True
+        """
+        res = cls.neutral_element()
+        for el in elems:
+            res *= el
+        return res
 
     @classmethod
-    def wsum(cls, weights, elems):
+    def wprod(cls, weights, elems):
+        """Efficient weighted product of a number of elements
+
+        In the current implementation this function is not optimized.
+        Example:
+            >>> weights = [1, 2, 3]
+            >>> elems = [ Gt.generator() ** x for x in [10, 25, 13]]
+            >>> Gt.wprod(weights, elems) ==  Gt.generator() ** (1 * 10 + 2 * 25 + 3 * 13)
+            True
+        """
         res = cls.neutral_element()
         for w, el in zip(weights, elems):
-            res += w * el
+            res *= el ** w
 
         return res
 
