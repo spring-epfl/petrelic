@@ -110,11 +110,17 @@ class G1:
 
     @classmethod
     def hash_to_point(cls, hinput):
-        return cls._element_type().from_hashed_bytes(hinput)
+        """Return group element obtained by hashing the input
 
-    @staticmethod
-    def sum(elems):
-        return sum(elems)
+        Example:
+            >>> elem = G1.hash_to_point(b"foo")
+            >>> elem.is_valid()
+            True
+        """
+        res = cls._new_element()
+        _C.g1_map(res.pt, hinput, len(hinput))
+        return res
+
 
     @classmethod
     def wsum(cls, weights, elems):
@@ -155,24 +161,11 @@ class G1Element():
     # Misc
     #
 
-    @classmethod
-    def from_hashed_bytes(cls, hinput):
-        """Generate an point on the EC from a hashed byte string.
-
-        Example:
-            >>> elem = G1Element.from_hashed_bytes(b"foo")
-            >>> elem.is_valid()
-            True
-        """
-        res = cls()
-        _C.g1_map(res.pt, hinput, len(hinput))
-        return res
-
     def is_valid(self):
         """Check if the data of this object is indeed a point on the EC.
 
         Example:
-            >>> elem = G1Element.from_hashed_bytes(b"foo")
+            >>> elem = G1.hash_to_point(b"foo")
             >>> elem.is_valid()
             True
         """

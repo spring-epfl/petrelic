@@ -22,12 +22,20 @@ def test_is_valid_gt():
     assert (Gt.generator() ** 100).is_valid()
 
 
-def test_from_hashed_bytes(element):
-    h1 = element.from_hashed_bytes(b'foo')
-    assert(isinstance(h1, element))
-    h2 = element.from_hashed_bytes(b'bar')
-    assert(isinstance(h2, element))
-    assert(h1 != h2)
+def test_hash_to_point_G1(group):
+    h1 = G1.hash_to_point(b'foo')
+    assert isinstance(h1, G1Element)
+    h2 = G1.hash_to_point(b'bar')
+    assert isinstance(h2, G1Element)
+    assert h1 != h2
+
+
+def test_hash_to_point_G2(group):
+    h1 = G2.hash_to_point(b'foo')
+    assert isinstance(h1, G2Element)
+    h2 = G2.hash_to_point(b'bar')
+    assert isinstance(h2, G2Element)
+    assert h1 != h2
 
 
 @pytest.mark.skip(reason="not planning to implement this for now")
