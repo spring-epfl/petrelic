@@ -38,8 +38,9 @@ Indeed, the pairing operator is bilinear. For example:
 >>> A.pair(B) == G1.generator().pair(G2.generator()) ** (a * b)
 True
 
-"""Clean API of the petrelic library.
 """
+
+import functools
 
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
@@ -48,6 +49,8 @@ from petrelic.bn import Bn, force_Bn_other
 # Utility function
 #
 def check_same_type(func):
+    """Enforce both arguments have same type"""
+    @functools.wraps(func)
     def wrapper(a, b):
         if not type(a) == type(b):
             return NotImplemented
@@ -69,11 +72,7 @@ class NoAffineCoordinateForECPoint(Exception):
 #
 
 class BilinearGroupPair:
-    """
-    A bilinear group pair.
-
-    Contains two origin groups G1, G2 and the image group Gt.
-    """
+    """A bilinear group pair used to wrap the three groups G1, G2, Gt."""
 
     def __init__(self):
         self.gt = Gt()
@@ -92,7 +91,7 @@ class BilinearGroupPair:
 #
 
 class G1:
-    """G1 group."""
+    """The G1 group."""
 
     @classmethod
     def _element_type(cls):
@@ -135,7 +134,8 @@ class G1:
     @classmethod
     def neutral_element(cls):
         """Return the neutral element of the group G1.
-        In this case, a point at infinity.
+
+        In this case, the point at infinity.
 
         Example:
             >>> generator = G1.generator()
@@ -200,7 +200,13 @@ class G1:
     # Aliases
     #
 
-    infinity = neutral_element
+    @classmethod
+    def infinity(cls):
+        """The point at infinity.
+
+        Alias for :py:meth:`G1.neutral_element`
+        """
+        return cls.neutral_element()
 
 
 class G1Element():
@@ -298,6 +304,26 @@ class G1Element():
         return x, y
 
     def pair(self, other):
+        """Pair element with another element in G2
+
+        Computes the bilinear pairing between self and another element in
+        :py:obj:`petrelic.pairing.G2`.
+
+        Examples:
+             >>> g1, g2 = G1.generator(), G2.generator()
+             >>> a, b = 10, 50
+             >>> A, B = a * g1, b * g2
+             >>> A.pair(B) == g1.pair(g2) ** (a * b)
+             True
+
+             >>> A.pair(g2) == g1.pair(a * g2)
+             True
+             >>> A.pair(g2) == g1.pair(g2) ** a
+             True
+        """
+        if not type(other) == G2Element:
+            raise TypeError("Second parameter should be of type G2Element is {}".format(type(other)))
+
         res = GtElement()
         _C.pc_map(res.pt, self.pt, other.pt)
         return res
@@ -352,13 +378,31 @@ class G1Element():
     #
 
     def __neg__(self):
-        """Return the inverse of the element of the G1."""
+        """Return the inverse of the element.
+
+        Examples:
+            >>> a = 30
+            >>> elem = a * G1.generator()
+            >>> -elem == elem.inverse()
+            True
+            >>> elem.inverse() == (G1.order() - a) * G1.generator()
+            True
+        """
         res = self.__class__()
         _C.g1_neg(res.pt, self.pt)
         return res
 
     def iinverse(self):
-        """Inplace inverse"""
+        """Inplace inverse of the current element
+
+        Examples:
+            >>> a = 30
+            >>> elem1 = a * G1.generator()
+            >>> elem2 = a * G1.generator()
+            >>> _ = elem1.iinverse()
+            >>> elem1 == elem2.inverse()
+            True
+        """
         _C.g1_neg(self.pt, self.pt)
         return self
 
@@ -367,14 +411,14 @@ class G1Element():
     #
 
     def __eq__(self, other):
-        """Check that the points on the EC are equal."""
+        """Check point equality."""
         if not isinstance(other, self.__class__):
             return False
 
         return _C.g1_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
 
     def __ne__(self, other):
-        """Check that the points on the EC are not equal."""
+        """Check that the points are different."""
         if not isinstance(other, self.__class__):
             return True
 
@@ -386,30 +430,88 @@ class G1Element():
 
     @check_same_type
     def __add__(self, other):
+        """Add two points together.
+
+        This method is aliased by `a + b`.
+
+        Examples:
+            >>> a = 10 * G1.generator()
+            >>> b = 40 * G1.generator()
+            >>> a + b == 50 * G1.generator()
+            True
+            >>> a.add(b) == 50 * G1.generator()
+            True
+        """
         res = self.__class__()
         _C.g1_add(res.pt, self.pt, other.pt)
         return res
 
     @check_same_type
     def __iadd__(self, other):
+        """Inplace add another point.
+
+        Examples:
+            >>> a = 10 * G1.generator()
+            >>> b = 10 * G1.generator()
+            >>> a += 3 * G1.generator()
+            >>> _ = b.iadd(3 * G1.generator())
+            >>> a == b
+            True
+            >>> a == 13 * G1.generator()
+            True
+        """
         self._is_gen = False
         _C.g1_add(self.pt, self.pt, other.pt)
         return self
 
     @check_same_type
     def __sub__(self, other):
+        """Substract two point
+
+        This method is aliased by `a - b`.
+
+        Examples:
+            >>> a = 50 * G1.generator()
+            >>> b = 13 * G1.generator()
+            >>> a - b == 37 * G1.generator()
+            True
+            >>> a.sub(b) == 37 * G1.generator()
+            True
+        """
         res = self.__class__()
         _C.g1_sub(res.pt, self.pt, other.pt)
         return res
 
     @check_same_type
     def __isub__(self, other):
+        """Inplace substract another point.
+
+        Examples:
+            >>> a = 10 * G1.generator()
+            >>> b = 10 * G1.generator()
+            >>> a -= 3 * G1.generator()
+            >>> _ = b.isub(3 * G1.generator())
+            >>> a == b
+            True
+            >>> a == 7 * G1.generator()
+            True
+        """
+
         self._is_gen = False
         _C.g1_sub(self.pt, self.pt, other.pt)
         return self
 
     @force_Bn_other
     def __mul__(self, other):
+        """Multiply point by a scalar
+
+        This method is aliased by `n * pt`.
+
+        Examples:
+            >>> g = G1.generator()
+            >>> g + g == 2 * g
+            True
+        """
         res = self.__class__()
         if self._is_gen:
             _C.g1_mul_gen(res.pt, other.bn)
@@ -428,6 +530,18 @@ class G1Element():
 
     @force_Bn_other
     def __imul__(self, other):
+        """Inplace point multiplication by a scalar
+
+        Examples:
+            >>> a = G1.generator()
+            >>> b = G1.generator()
+            >>> a *= 10
+            >>> _ = b.imul(10)
+            >>> a == b
+            True
+            >>> a == 10 * G1.generator()
+            True
+        """
         if self._is_gen:
             _C.g1_mul_gen(self.pt, other.bn)
             self._is_gen = False
