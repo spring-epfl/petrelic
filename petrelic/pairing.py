@@ -1,3 +1,42 @@
+r"""
+A native Python wrapper around RELIC's pairings
+
+This module provides a Python wrapper around RELIC's pairings using a native
+interface: operations in :py:obj:`petrelic.pairings.G1` and
+:py:obj:`petrelic.pairings.G2` are written additively, whereas operations in
+:py:obj:`petrelic.pairings.Gt` are written multiplicatively.
+
+Let's see how we can use this interface to implement the Boney-Lynn-Shacham
+signature scheme for type III pairings. First we generate a private key:
+
+>>> sk = G1.order().random()
+
+which is a random integer modulo the group order. Note that for this setting,
+all three groups have the same order. Next, we generate the corresponding public
+key:
+
+>>> pk = (sk * G1.generator(), sk * G2.generator())
+
+(For security in the type III setting, the first component is a necessary part
+of the public key. It is not actually used in the scheme.) To sign a message
+`m` we first hash it to the curve G1 using :py:meth:`G1.hash_to_point` and then
+multiply it with the signing key `sk` to obtain a signature:
+
+>>> m = b"Some message"
+>>> signature = sk * G1.hash_to_point(m)
+
+Finally, we can use the pairing operator to verify the signature:
+
+>>> signature.pair(G2.generator()) == G1.hash_to_point(m).pair(pk[1])
+True
+
+Indeed, the pairing operator is bilinear. For example:
+
+>>> a, b = 13, 29
+>>> A = a * G1.generator()
+>>> B = b * G2.generator()
+>>> A.pair(B) == G1.generator().pair(G2.generator()) ** (a * b)
+True
 
 """Clean API of the petrelic library.
 """
