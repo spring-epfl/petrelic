@@ -15,7 +15,7 @@ docker run --rm --name manylinux -v'/tmp/petrelic/:/host' -it quay.io/pypa/${MAN
 if [ $? -eq 0 ]
 then
     echo 'Wheels are in "/tmp/petrelic/wheelhouse/".' >&2
-    cp -r /tmp/petrelic/wheelhouse /host/
+    cp -r /tmp/petrelic/wheelhouse ./
 else
     echo 'Something went wrong.' >&2
     exit 1
