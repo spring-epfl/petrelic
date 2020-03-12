@@ -16,6 +16,7 @@ Welcome to Petrelic's documentation!
    :caption: Basics
 
    quickstart
+   install
 
 .. toctree::
    :maxdepth: 2
@@ -28,9 +29,9 @@ Welcome to Petrelic's documentation!
    :caption: Reference
 
    petrelic.bn
-   petrelic.native.pairing
+   petrelic.native
    petrelic.additive
-   petrelic.petlib
+   petrelic.multiplicative
 
 
 Indices and tables
