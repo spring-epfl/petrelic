@@ -1037,7 +1037,7 @@ class GtElement():
 
         Examples:
             >>> a = 30
-            >>> elem = G1.generator() ** a
+            >>> elem = Gt.generator() ** a
             >>> elem.inverse() == Gt.generator() ** (G1.order() - a)
             True
         """
@@ -1050,8 +1050,8 @@ class GtElement():
 
         Examples:
             >>> a = 30
-            >>> elem1 = G1.generator() ** a
-            >>> elem2 = G1.generator() ** a
+            >>> elem1 = Gt.generator() ** a
+            >>> elem2 = Gt.generator() ** a
             >>> _ = elem1.iinverse()
             >>> elem1 == elem2.inverse()
             True

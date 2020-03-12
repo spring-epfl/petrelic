@@ -6,12 +6,10 @@ import petlib.pack as pack
 
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
+from petrelic.native.pairing import NoAffineCoordinateForECPoint
 
-from petrelic.pairing import G2
-from petrelic.pairing import G2Element
-from petrelic.pairing import NoAffineCoordinateForECPoint
-
-import petrelic.pairing as mulpairing
+import petrelic.native.pairing as native
+from petrelic.native.pairing import G2, G2Element
 
 class BilinearGroupPair:
     """
@@ -33,7 +31,7 @@ class BilinearGroupPair:
         return self.G1, self.G2, self.GT
 
 
-class G1(mulpairing.G1):
+class G1(native.G1):
     """G1 group."""
 
     @classmethod
@@ -41,7 +39,7 @@ class G1(mulpairing.G1):
         return G1Element
 
 
-class G1Element(mulpairing.G1Element):
+class G1Element(native.G1Element):
     """Element of the G1 group."""
 
     group = G1
@@ -52,7 +50,7 @@ class G1Element(mulpairing.G1Element):
         return res
 
 
-class Gt(mulpairing.Gt):
+class Gt(native.Gt):
     """Gt group."""
 
     @classmethod
@@ -94,10 +92,10 @@ class Gt(mulpairing.Gt):
 
         return res
 
-    infinity = mulpairing.Gt.neutral_element
+    infinity = native.Gt.neutral_element
 
 
-class GtElement(mulpairing.GtElement):
+class GtElement(native.GtElement):
     """Gt element."""
 
     group = Gt
@@ -147,17 +145,17 @@ class GtElement(mulpairing.GtElement):
     # Binary operators
     #
 
-    double = mulpairing.GtElement.square
-    idouble = mulpairing.GtElement.isquare
+    double = native.GtElement.square
+    idouble = native.GtElement.isquare
 
-    __add__ = mulpairing.GtElement.__mul__
-    __iadd__ = mulpairing.GtElement.__imul__
+    __add__ = native.GtElement.__mul__
+    __iadd__ = native.GtElement.__imul__
 
-    __sub__ = mulpairing.GtElement.__truediv__
-    __isub__ = mulpairing.GtElement.__itruediv__
+    __sub__ = native.GtElement.__truediv__
+    __isub__ = native.GtElement.__itruediv__
 
-    __mul__ = mulpairing.GtElement.__pow__
-    __imul__ = mulpairing.GtElement.__ipow__
+    __mul__ = native.GtElement.__pow__
+    __imul__ = native.GtElement.__ipow__
 
     @force_Bn_other
     def __rmul__(self, other):
@@ -198,6 +196,6 @@ def pt_dec(bptype):
     return dec
 
 # Register encoders and decoders for pairing points
-pack.register_coders(G1Element, 114, pt_enc, pt_dec(G1Element))
-pack.register_coders(G2Element, 115, pt_enc, pt_dec(G2Element))
-pack.register_coders(GtElement, 116, pt_enc, pt_dec(GtElement))
+# pack.register_coders(G1Element, 114, pt_enc, pt_dec(G1Element))
+# pack.register_coders(G2Element, 115, pt_enc, pt_dec(G2Element))
+# pack.register_coders(GtElement, 116, pt_enc, pt_dec(GtElement))

@@ -6,12 +6,9 @@ import petlib.pack as pack
 
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
+from petrelic.native.pairing import NoAffineCoordinateForECPoint
 
-from petrelic.pairing import G2
-from petrelic.pairing import G2Element
-from petrelic.pairing import NoAffineCoordinateForECPoint
-
-import petrelic.pairing as basepairing
+import petrelic.native.pairing as native
 
 
 class BilinearGroupPair:
@@ -34,7 +31,7 @@ class BilinearGroupPair:
         return self.G1, self.G2, self.GT
 
 
-class G1(basepairing.G1):
+class G1(native.G1):
     """G1 group."""
 
     @classmethod
@@ -74,10 +71,10 @@ class G1(basepairing.G1):
 
         return res
 
-    unity = basepairing.G1.neutral_element
+    unity = native.G1.neutral_element
 
 
-class G1Element(basepairing.G1Element):
+class G1Element(native.G1Element):
     """Element of the G1 group."""
 
     group = G1
@@ -87,17 +84,17 @@ class G1Element(basepairing.G1Element):
         _C.pc_map(res.pt, self.pt, other.pt)
         return res
 
-    square = basepairing.G1Element.double
-    isquare = basepairing.G1Element.idouble
+    square = native.G1Element.double
+    isquare = native.G1Element.idouble
 
-    __mul__ = basepairing.G1Element.__add__
-    __imul__ = basepairing.G1Element.__iadd__
+    __mul__ = native.G1Element.__add__
+    __imul__ = native.G1Element.__iadd__
 
-    __truediv__ = basepairing.G1Element.__sub__
-    __itruediv__ = basepairing.G1Element.__isub__
+    __truediv__ = native.G1Element.__sub__
+    __itruediv__ = native.G1Element.__isub__
 
-    __pow__ = basepairing.G1Element.__mul__
-    __ipow__ = basepairing.G1Element.__imul__
+    __pow__ = native.G1Element.__mul__
+    __ipow__ = native.G1Element.__imul__
 
     mul = __mul__
     imul = __imul__
@@ -109,30 +106,30 @@ class G1Element(basepairing.G1Element):
     ipow = __ipow__
 
 
-class G2(basepairing.G2):
+class G2(native.G2):
     @classmethod
     def _element_type(cls):
         return G2Element
 
-    unity = basepairing.G2.neutral_element
+    unity = native.G2.neutral_element
 
 
-class G2Element(basepairing.G2Element):
+class G2Element(native.G2Element):
     """Element of the G2 group."""
 
     group = G2
 
-    square = basepairing.G2Element.double
-    isquare = basepairing.G2Element.idouble
+    square = native.G2Element.double
+    isquare = native.G2Element.idouble
 
-    __mul__ = basepairing.G2Element.__add__
-    __imul__ = basepairing.G2Element.__iadd__
+    __mul__ = native.G2Element.__add__
+    __imul__ = native.G2Element.__iadd__
 
-    __truediv__ = basepairing.G2Element.__sub__
-    __itruediv__ = basepairing.G2Element.__isub__
+    __truediv__ = native.G2Element.__sub__
+    __itruediv__ = native.G2Element.__isub__
 
-    __pow__ = basepairing.G2Element.__mul__
-    __ipow__ = basepairing.G2Element.__imul__
+    __pow__ = native.G2Element.__mul__
+    __ipow__ = native.G2Element.__imul__
 
     mul = __mul__
     imul = __imul__
@@ -145,7 +142,7 @@ class G2Element(basepairing.G2Element):
 
 
 
-class Gt(basepairing.Gt):
+class Gt(native.Gt):
     """Gt group."""
 
     @classmethod
@@ -153,7 +150,7 @@ class Gt(basepairing.Gt):
         return GtElement
 
 
-class GtElement(basepairing.GtElement):
+class GtElement(native.GtElement):
     """Gt element."""
 
     group = Gt
