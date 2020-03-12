@@ -103,7 +103,7 @@ class G1:
 
     @classmethod
     def order(cls):
-        """Return the order of the EC group as a Bn large integer.
+        """Return the order of the group as a Bn large integer.
 
         Example:
             >>> generator = G1.generator()
@@ -118,7 +118,7 @@ class G1:
 
     @classmethod
     def generator(cls):
-        """Return generator of the EC group.
+        """Return generator of the group.
 
         Example:
             >>> generator = G1.generator()
@@ -233,7 +233,7 @@ class G1Element():
     #
 
     def is_valid(self):
-        """Check if the data of this object is indeed a point on the EC.
+        """Check if the element indeed lies on the curve.
 
         Example:
             >>> elem = G1.hash_to_point(b"foo")
@@ -256,7 +256,7 @@ class G1Element():
         return bool(_C.g1_is_infty(self.pt))
 
     def double(self):
-        """Return an element which is the double of the current one.
+        """Return double of the current element
 
         Example:
             >>> generator = G1.generator()
@@ -269,7 +269,7 @@ class G1Element():
         return res
 
     def idouble(self):
-        """Double the current element.
+        """Inplace double the current element.
 
         Example:
             >>> generator = G1.generator()
@@ -466,7 +466,7 @@ class G1Element():
 
     @check_same_type
     def __sub__(self, other):
-        """Substract two point
+        """Substract two points
 
         This method is aliased by `a - b`.
 
@@ -596,7 +596,7 @@ class G2:
 
     @classmethod
     def generator(cls):
-        """Return generator of the EC group.
+        """Return generator of the group.
 
         Example:
             >>> generator = G2.generator()
@@ -611,7 +611,8 @@ class G2:
     @classmethod
     def neutral_element(cls):
         """Return the neutral element of the group G2.
-        In this case, a point at infinity.
+
+        In this case, the point at infinity.
 
         Example:
             >>> generator = G2.generator()
@@ -622,6 +623,18 @@ class G2:
         neutral = cls._new_element()
         _C.g2_set_infty(neutral.pt)
         return neutral
+
+    @classmethod
+    def hash_to_point(cls, hinput):
+        """Return group element obtained by hashing the input
+
+        Example:
+            >>> elem = G2.hash_to_point(b"foo")
+            >>> elem.is_valid()
+            True
+        """
+        return cls._element_type().from_hashed_bytes(hinput)
+
 
     @classmethod
     def sum(cls, elems):
@@ -658,19 +671,21 @@ class G2:
 
         return res
 
-    @classmethod
-    def hash_to_point(cls, hinput):
-        return cls._element_type().from_hashed_bytes(hinput)
-
     #
     # Aliases
     #
 
-    infinity = neutral_element
+    @classmethod
+    def infinity(cls):
+        """The point at infinity.
+
+        Alias for :py:meth:`G1.neutral_element`
+        """
+        return cls.neutral_element()
 
 
 class G2Element():
-    """G2 element."""
+    """Element of the G2 group."""
 
     group = G2
 
@@ -704,50 +719,18 @@ class G2Element():
         return res
 
     def is_valid(self):
-        """Check if the data of this object is indeed a point on the EC.
-
-        Example:
-            >>> elem = G2Element.from_hashed_bytes(b"foo")
-            >>> elem.is_valid()
-            True
-        """
         return bool(_C.g2_is_valid(self.pt))
 
     def is_neutral_element(self):
-        """Check if the object is the neutral element of G2.
-
-        Example:
-            >>> generator = G2.generator()
-            >>> order = G2.order()
-            >>> elem = order * generator
-            >>> elem.is_neutral_element()
-            True
-        """
         _C.g2_norm(self.pt, self.pt)
         return bool(_C.g2_is_infty(self.pt))
 
     def double(self):
-        """Return an element which is the double of the current one.
-
-        Example:
-            >>> generator = G2.generator()
-            >>> elem = generator.double()
-            >>> elem == 2 * generator
-            True
-        """
         res = self.__class__()
         _C.g2_dbl(res.pt, self.pt)
         return res
 
     def idouble(self):
-        """Double the current element.
-
-        Example:
-            >>> generator = G2.generator()
-            >>> elem = G2.generator().idouble()
-            >>> elem == 2 * generator
-            True
-        """
         _C.g2_dbl(self.pt, self.pt)
         return self
 
@@ -759,6 +742,7 @@ class G2Element():
         """String representation of the element of G2."""
         pt_hex = self.to_binary().hex()
         return 'G2Element({})'.format(pt_hex)
+
 
     #
     # Serialization
@@ -780,33 +764,24 @@ class G2Element():
         return elem
 
     def to_binary(self, compressed=True):
-        """Serialize the element of G2 into a binary representation.
-
-        Example:
-            >>> generator = G2.generator()
-            >>> bin_repr = generator.to_binary()
-            >>> elem = G2Element.from_binary(bin_repr)
-            >>> generator == elem
-            True
-        """
         flag = int(compressed)
         length = _C.g2_size_bin(self.pt, flag)
         buf = _FFI.new("char[]", length)
         _C.g2_write_bin(buf, length, self.pt, flag)
         return _FFI.unpack(buf, length)
 
+    to_binary.__doc__ = G1Element.to_binary.__doc__.replace("G1", "G2")
+
     #
     # Unary operators
     #
 
     def __neg__(self):
-        """Return the inverse of the element of G2."""
         res = self.__class__()
         _C.g2_neg(res.pt, self.pt)
         return res
 
     def iinverse(self):
-        """Inplace inverse"""
         _C.g2_neg(self.pt, self.pt)
         return self
 
@@ -870,6 +845,24 @@ class G2Element():
     def __imul__(self, other):
         _C.g2_mul(self.pt, self.pt, other.bn)
         return self
+
+    # Copy documentation from G1Element
+    is_valid.__doc__ = G1Element.is_valid.__doc__.replace("G1", "G2")
+    is_neutral_element.__doc__ = G1Element.is_neutral_element.__doc__.replace("G1", "G2")
+    double.__doc__ = G1Element.double.__doc__.replace("G1", "G2")
+    idouble.__doc__ = G1Element.idouble.__doc__.replace("G1", "G2")
+
+    __add__.__doc__ = G1Element.__add__.__doc__.replace("G1", "G2")
+    __iadd__.__doc__ = G1Element.__add__.__doc__.replace("G1", "G2")
+
+    __sub__.__doc__ = G1Element.__sub__.__doc__.replace("G1", "G2")
+    __isub__.__doc__ = G1Element.__isub__.__doc__.replace("G1", "G2")
+
+    __mul__.__doc__ = G1Element.__mul__.__doc__.replace("G1", "G2")
+    __imul__.__doc__ = G1Element.__imul__.__doc__.replace("G1", "G2")
+
+    __neg__.__doc__ = G1Element.__neg__.__doc__.replace("G1", "G2")
+    iinverse.__doc__ = G1Element.iinverse.__doc__.replace("G1", "G2")
 
     #
     # Aliases
@@ -966,6 +959,7 @@ class Gt:
         """Efficient weighted product of a number of elements
 
         In the current implementation this function is not optimized.
+
         Example:
             >>> weights = [1, 2, 3]
             >>> elems = [ Gt.generator() ** x for x in [10, 25, 13]]
@@ -982,7 +976,13 @@ class Gt:
     # Aliases
     #
 
-    get_unity = neutral_element
+    @classmethod
+    def unity(cls):
+        """The unity elements
+
+        Alias for :py:meth:`Gt.neutral_element`
+        """
+        return cls.neutral_element()
 
 
 class GtElement():
@@ -1007,10 +1007,10 @@ class GtElement():
     #
 
     def is_valid(self):
-        """Check if the data of this object is indeed a point on the EC.
+        """Check if the element is in the group
 
         Example:
-            >>> elem = Gt.generator()
+            >>> elem = Gt.generator() ** 1337
             >>> elem.is_valid()
             True
         """
@@ -1033,18 +1033,34 @@ class GtElement():
         return bool(_C.gt_is_unity(self.pt))
 
     def inverse(self):
-        """Return the inverse of the element of Gt."""
+        """Return the inverse of the element.
+
+        Examples:
+            >>> a = 30
+            >>> elem = G1.generator() ** a
+            >>> elem.inverse() == Gt.generator() ** (G1.order() - a)
+            True
+        """
         res = self.__class__()
         _C.gt_inv(res.pt, self.pt)
         return res
 
     def iinverse(self):
-        """Inverse the element of Gt."""
+        """Inplace inverse of the current element
+
+        Examples:
+            >>> a = 30
+            >>> elem1 = G1.generator() ** a
+            >>> elem2 = G1.generator() ** a
+            >>> _ = elem1.iinverse()
+            >>> elem1 == elem2.inverse()
+            True
+        """
         _C.gt_inv(self.pt, self.pt)
         return self
 
     def square(self):
-        """Return an element which is the square of the current one.
+        """Return the square of the current element
 
         Example:
             >>> generator = Gt.generator()
@@ -1057,12 +1073,12 @@ class GtElement():
         return res
 
     def isquare(self):
-        """Double the current element.
+        """Inplace square of the current element.
 
         Example:
-            >>> generator = Gt.generator()
-            >>> elem = Gt.generator().isquare()
-            >>> elem == generator ** 2
+            >>> elem = Gt.generator()
+            >>> _ = elem.isquare()
+            >>> elem == Gt.generator() ** 2
             True
         """
         _C.gt_sqr(self.pt, self.pt)
@@ -1097,27 +1113,20 @@ class GtElement():
         return ret
 
     def to_binary(self, compressed=True):
-        """Serialize the element of Gt into a binary representation.
-
-        Example:
-            >>> generator = Gt.generator()
-            >>> bin_repr = generator.to_binary()
-            >>> elem = GtElement.from_binary(bin_repr)
-            >>> generator == elem
-            True
-        """
         flag = int(compressed)
         length = _C.gt_size_bin(self.pt, flag)
         buf = _FFI.new("char[]", length)
         _C.gt_write_bin(buf, length, self.pt, flag)
         return _FFI.unpack(buf, length)
 
+    to_binary.__doc__ = G1Element.to_binary.__doc__.replace("G1", "Gt")
+
     #
     # Comparison operators
     #
 
     def __eq__(self, other):
-        """Check that the points on the EC are equal."""
+        """Check that the points are equal."""
         if not isinstance(other, self.__class__):
             return False
 
@@ -1136,29 +1145,88 @@ class GtElement():
 
     @check_same_type
     def __mul__(self, other):
+        """Multiply two elements
+
+        This method is aliased by `a * b`.
+
+        Examples:
+            >>> a = Gt.generator() ** 10
+            >>> b = Gt.generator() ** 40
+            >>> a * b == Gt.generator() ** 50
+            True
+            >>> a.mul(b) == Gt.generator() ** 50
+            True
+        """
         res = self.__class__()
         _C.gt_mul(res.pt, self.pt, other.pt)
         return res
 
     @check_same_type
     def __imul__(self, other):
+        """Inplace multiplication by another element
+
+        Examples:
+            >>> a = Gt.generator() ** 10
+            >>> b = Gt.generator() ** 10
+            >>> a *= Gt.generator() ** 3
+            >>> _ = b.imul(Gt.generator() ** 3)
+            >>> a == b
+            True
+            >>> a == Gt.generator() ** 13
+            True
+        """
         _C.gt_mul(self.pt, self.pt, other.pt)
         return self
 
     @check_same_type
     def __truediv__(self, other):
+        """Divide two points
+
+        This method is aliased by `a / b` and `a // b`.
+
+        Examples:
+            >>> a = Gt.generator() ** 50
+            >>> b = Gt.generator() ** 13
+            >>> a / b == Gt.generator() ** 37
+            True
+            >>> a // b == Gt.generator() ** 37
+            True
+            >>> a.div(b) == Gt.generator() ** 37
+            True
+        """
         res = other.inverse()
         _C.gt_mul(res.pt, self.pt, res.pt)
         return res
 
     @check_same_type
     def __itruediv__(self, other):
+        """Inplace division by another point
+
+        Examples:
+            >>> a = Gt.generator() ** 10
+            >>> b = Gt.generator() ** 10
+            >>> a /= Gt.generator() ** 3
+            >>> _ = b.idiv(Gt.generator() ** 3)
+            >>> a == b
+            True
+            >>> a == Gt.generator() ** 7
+            True
+        """
         other_inv = other.inverse()
         _C.gt_mul(self.pt, self.pt, other_inv.pt)
         return self
 
     @force_Bn_other
     def __pow__(self, other):
+        """Raise element to the power of a scalar
+
+        This method is aliased by `el ** n`.
+
+        Examples:
+            >>> g = Gt.generator()
+            >>> g * g == g ** 2
+            True
+        """
         res = self.__class__()
         exponent = other.mod(self.group.order())
         _C.gt_exp(res.pt, self.pt, exponent.bn)
@@ -1166,9 +1234,19 @@ class GtElement():
 
     @force_Bn_other
     def __ipow__(self, other):
+        """Inplace raise element to the power of a scalar
+
+        Examples:
+            >>> g = Gt.generator()
+            >>> a = Gt.generator()
+            >>> _ = a.ipow(3)
+            >>> g * g * g == a
+            True
+        """
         exponent = other.mod(self.group.order())
         _C.gt_exp(self.pt, self.pt, exponent.bn)
         return self
+
 
     #
     # Aliases
@@ -1180,8 +1258,8 @@ class GtElement():
     ne = __ne__
     mul = __mul__
     imul = __imul__
-    truediv = __truediv__
-    itruediv = __itruediv__
+    div = __truediv__
+    idiv = __itruediv__
     __floordiv__ = __truediv__
     __ifloordiv__ = __itruediv__
     pow = __pow__
