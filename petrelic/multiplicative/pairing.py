@@ -15,18 +15,18 @@ class BilinearGroupPair:
     """
     A bilinear group pair.
 
-    Contains two origin groups G1, G2 and the image group Gt.
+    Contains two origin groups G1, G2 and the image group GT.
     """
 
     def __init__(self):
         """Initialise a bilinear group pair."""
-        self.GT = Gt()
+        self.GT = GT()
         self.G1 = G1()
         self.G2 = G2()
 
     def groups(self):
         """
-        Returns the three groups in the following order :  G1, G2, Gt.
+        Returns the three groups in the following order :  G1, G2, GT.
         """
         return self.G1, self.G2, self.GT
 
@@ -80,7 +80,7 @@ class G1Element(native.G1Element):
     group = G1
 
     def pair(self, other):
-        res = GtElement()
+        res = GTElement()
         _C.pc_map(res.pt, self.pt, other.pt)
         return res
 
@@ -142,18 +142,18 @@ class G2Element(native.G2Element):
 
 
 
-class Gt(native.Gt):
-    """Gt group."""
+class GT(native.GT):
+    """GT group."""
 
     @classmethod
     def _element_type(cls):
-        return GtElement
+        return GTElement
 
 
-class GtElement(native.GtElement):
-    """Gt element."""
+class GTElement(native.GTElement):
+    """GT element."""
 
-    group = Gt
+    group = GT
 
 
 def pt_enc(obj):
@@ -177,4 +177,4 @@ def pt_dec(bptype):
 # Register encoders and decoders for pairing points
 # pack.register_coders(G1Element, 118, pt_enc, pt_dec(G1Element))
 # pack.register_coders(G2Element, 119, pt_enc, pt_dec(G2Element))
-# pack.register_coders(GtElement, 120, pt_enc, pt_dec(GtElement))
+# pack.register_coders(GTElement, 120, pt_enc, pt_dec(GTElement))

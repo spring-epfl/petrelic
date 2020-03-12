@@ -4,7 +4,7 @@ A native Python wrapper around RELIC's pairings
 This module provides a Python wrapper around RELIC's pairings using a native
 interface: operations in :py:obj:`petrelic.pairings.G1` and
 :py:obj:`petrelic.pairings.G2` are written additively, whereas operations in
-:py:obj:`petrelic.pairings.Gt` are written multiplicatively.
+:py:obj:`petrelic.pairings.GT` are written multiplicatively.
 
 Let's see how we can use this interface to implement the Boney-Lynn-Shacham
 signature scheme for type III pairings. First we generate a private key:
@@ -72,16 +72,16 @@ class NoAffineCoordinateForECPoint(Exception):
 #
 
 class BilinearGroupPair:
-    """A bilinear group pair used to wrap the three groups G1, G2, Gt."""
+    """A bilinear group pair used to wrap the three groups G1, G2, GT."""
 
     def __init__(self):
-        self.gt = Gt()
+        self.gt = GT()
         self.g1 = G1()
         self.g2 = G2()
 
     def groups(self):
         """
-        Returns the three groups in the following order :  G1, G2, Gt.
+        Returns the three groups in the following order :  G1, G2, GT.
         """
         return self.g1, self.g2, self.gt
 
@@ -324,7 +324,7 @@ class G1Element():
         if not type(other) == G2Element:
             raise TypeError("Second parameter should be of type G2Element is {}".format(type(other)))
 
-        res = GtElement()
+        res = GTElement()
         _C.pc_map(res.pt, self.pt, other.pt)
         return res
 
@@ -882,12 +882,12 @@ class G2Element():
     imul = __imul__
 
 
-class Gt:
-    """Gt group."""
+class GT:
+    """GT group."""
 
     @classmethod
     def _element_type(cls):
-        return GtElement
+        return GTElement
 
     @classmethod
     def _new_element(cls):
@@ -899,9 +899,9 @@ class Gt:
         """Return the order of the EC group as a Bn large integer.
 
         Example:
-            >>> generator = Gt.generator()
-            >>> neutral = Gt.neutral_element()
-            >>> order = Gt.order()
+            >>> generator = GT.generator()
+            >>> neutral = GT.neutral_element()
+            >>> order = GT.order()
             >>> generator ** order == neutral
             True
         """
@@ -914,8 +914,8 @@ class Gt:
         """Return generator of the EC group.
 
         Example:
-            >>> generator = Gt.generator()
-            >>> neutral = Gt.neutral_element()
+            >>> generator = GT.generator()
+            >>> neutral = GT.neutral_element()
             >>> generator * neutral == generator
             True
         """
@@ -925,12 +925,12 @@ class Gt:
 
     @classmethod
     def neutral_element(cls):
-        """Return the neutral element of the group Gt.
+        """Return the neutral element of the group GT.
         In this case, the unity point.
 
         Example:
-            >>> generator = Gt.generator()
-            >>> neutral = Gt.neutral_element()
+            >>> generator = GT.generator()
+            >>> neutral = GT.neutral_element()
             >>> generator * neutral == generator
             True
         """
@@ -945,8 +945,8 @@ class Gt:
         In the current implementation this function is not optimized.
 
         Example:
-            >>> elems = [ Gt.generator() ** x for x in [10, 25, 13]]
-            >>> Gt.prod(elems) ==  Gt.generator() ** (10 + 25 + 13)
+            >>> elems = [ GT.generator() ** x for x in [10, 25, 13]]
+            >>> GT.prod(elems) ==  GT.generator() ** (10 + 25 + 13)
             True
         """
         res = cls.neutral_element()
@@ -962,8 +962,8 @@ class Gt:
 
         Example:
             >>> weights = [1, 2, 3]
-            >>> elems = [ Gt.generator() ** x for x in [10, 25, 13]]
-            >>> Gt.wprod(weights, elems) ==  Gt.generator() ** (1 * 10 + 2 * 25 + 3 * 13)
+            >>> elems = [ GT.generator() ** x for x in [10, 25, 13]]
+            >>> GT.wprod(weights, elems) ==  GT.generator() ** (1 * 10 + 2 * 25 + 3 * 13)
             True
         """
         res = cls.neutral_element()
@@ -980,24 +980,24 @@ class Gt:
     def unity(cls):
         """The unity elements
 
-        Alias for :py:meth:`Gt.neutral_element`
+        Alias for :py:meth:`GT.neutral_element`
         """
         return cls.neutral_element()
 
 
-class GtElement():
-    """Gt element."""
+class GTElement():
+    """GT element."""
 
-    group = Gt
+    group = GT
 
     def __init__(self):
-        """Initialize a new element of Gt."""
+        """Initialize a new element of GT."""
         self.pt = _FFI.new("gt_t")
         _C.gt_null(self.pt)
         _C.gt_new(self.pt)
 
     def __copy__(self):
-        """Clone an element of Gt."""
+        """Clone an element of GT."""
         copy = self.__class__()
         _C.gt_copy(copy.pt, self.pt)
         return copy
@@ -1010,7 +1010,7 @@ class GtElement():
         """Check if the element is in the group
 
         Example:
-            >>> elem = Gt.generator() ** 1337
+            >>> elem = GT.generator() ** 1337
             >>> elem.is_valid()
             True
         """
@@ -1021,11 +1021,11 @@ class GtElement():
         return bool(_C.gt_is_valid(self.pt))
 
     def is_neutral_element(self):
-        """Check if the object is the neutral element of Gt.
+        """Check if the object is the neutral element of GT.
 
         Example:
-            >>> generator = Gt.generator()
-            >>> order = Gt.order()
+            >>> generator = GT.generator()
+            >>> order = GT.order()
             >>> elem = generator ** order
             >>> elem.is_neutral_element()
             True
@@ -1037,8 +1037,8 @@ class GtElement():
 
         Examples:
             >>> a = 30
-            >>> elem = Gt.generator() ** a
-            >>> elem.inverse() == Gt.generator() ** (G1.order() - a)
+            >>> elem = GT.generator() ** a
+            >>> elem.inverse() == GT.generator() ** (G1.order() - a)
             True
         """
         res = self.__class__()
@@ -1050,8 +1050,8 @@ class GtElement():
 
         Examples:
             >>> a = 30
-            >>> elem1 = Gt.generator() ** a
-            >>> elem2 = Gt.generator() ** a
+            >>> elem1 = GT.generator() ** a
+            >>> elem2 = GT.generator() ** a
             >>> _ = elem1.iinverse()
             >>> elem1 == elem2.inverse()
             True
@@ -1063,7 +1063,7 @@ class GtElement():
         """Return the square of the current element
 
         Example:
-            >>> generator = Gt.generator()
+            >>> generator = GT.generator()
             >>> elem = generator.square()
             >>> elem == generator ** 2
             True
@@ -1076,9 +1076,9 @@ class GtElement():
         """Inplace square of the current element.
 
         Example:
-            >>> elem = Gt.generator()
+            >>> elem = GT.generator()
             >>> _ = elem.isquare()
-            >>> elem == Gt.generator() ** 2
+            >>> elem == GT.generator() ** 2
             True
         """
         _C.gt_sqr(self.pt, self.pt)
@@ -1091,7 +1091,7 @@ class GtElement():
     def __repr__(self):
         """String representation of the element of G2."""
         pt_hex = self.to_binary().hex()
-        return 'GtElement({})'.format(pt_hex)
+        return 'GTElement({})'.format(pt_hex)
 
     #
     # Serialization
@@ -1099,12 +1099,12 @@ class GtElement():
 
     @classmethod
     def from_binary(cls, sbin):
-        """Deserialize a binary representation of the element of Gt.
+        """Deserialize a binary representation of the element of GT.
 
         Example:
-            >>> generator = Gt.generator()
+            >>> generator = GT.generator()
             >>> bin_repr = generator.to_binary()
-            >>> elem = GtElement.from_binary(bin_repr)
+            >>> elem = GTElement.from_binary(bin_repr)
             >>> generator == elem
             True
         """
@@ -1119,7 +1119,7 @@ class GtElement():
         _C.gt_write_bin(buf, length, self.pt, flag)
         return _FFI.unpack(buf, length)
 
-    to_binary.__doc__ = G1Element.to_binary.__doc__.replace("G1", "Gt")
+    to_binary.__doc__ = G1Element.to_binary.__doc__.replace("G1", "GT")
 
     #
     # Comparison operators
@@ -1150,11 +1150,11 @@ class GtElement():
         This method is aliased by `a * b`.
 
         Examples:
-            >>> a = Gt.generator() ** 10
-            >>> b = Gt.generator() ** 40
-            >>> a * b == Gt.generator() ** 50
+            >>> a = GT.generator() ** 10
+            >>> b = GT.generator() ** 40
+            >>> a * b == GT.generator() ** 50
             True
-            >>> a.mul(b) == Gt.generator() ** 50
+            >>> a.mul(b) == GT.generator() ** 50
             True
         """
         res = self.__class__()
@@ -1166,13 +1166,13 @@ class GtElement():
         """Inplace multiplication by another element
 
         Examples:
-            >>> a = Gt.generator() ** 10
-            >>> b = Gt.generator() ** 10
-            >>> a *= Gt.generator() ** 3
-            >>> _ = b.imul(Gt.generator() ** 3)
+            >>> a = GT.generator() ** 10
+            >>> b = GT.generator() ** 10
+            >>> a *= GT.generator() ** 3
+            >>> _ = b.imul(GT.generator() ** 3)
             >>> a == b
             True
-            >>> a == Gt.generator() ** 13
+            >>> a == GT.generator() ** 13
             True
         """
         _C.gt_mul(self.pt, self.pt, other.pt)
@@ -1185,13 +1185,13 @@ class GtElement():
         This method is aliased by `a / b` and `a // b`.
 
         Examples:
-            >>> a = Gt.generator() ** 50
-            >>> b = Gt.generator() ** 13
-            >>> a / b == Gt.generator() ** 37
+            >>> a = GT.generator() ** 50
+            >>> b = GT.generator() ** 13
+            >>> a / b == GT.generator() ** 37
             True
-            >>> a // b == Gt.generator() ** 37
+            >>> a // b == GT.generator() ** 37
             True
-            >>> a.div(b) == Gt.generator() ** 37
+            >>> a.div(b) == GT.generator() ** 37
             True
         """
         res = other.inverse()
@@ -1203,13 +1203,13 @@ class GtElement():
         """Inplace division by another point
 
         Examples:
-            >>> a = Gt.generator() ** 10
-            >>> b = Gt.generator() ** 10
-            >>> a /= Gt.generator() ** 3
-            >>> _ = b.idiv(Gt.generator() ** 3)
+            >>> a = GT.generator() ** 10
+            >>> b = GT.generator() ** 10
+            >>> a /= GT.generator() ** 3
+            >>> _ = b.idiv(GT.generator() ** 3)
             >>> a == b
             True
-            >>> a == Gt.generator() ** 7
+            >>> a == GT.generator() ** 7
             True
         """
         other_inv = other.inverse()
@@ -1223,7 +1223,7 @@ class GtElement():
         This method is aliased by `el ** n`.
 
         Examples:
-            >>> g = Gt.generator()
+            >>> g = GT.generator()
             >>> g * g == g ** 2
             True
         """
@@ -1237,8 +1237,8 @@ class GtElement():
         """Inplace raise element to the power of a scalar
 
         Examples:
-            >>> g = Gt.generator()
-            >>> a = Gt.generator()
+            >>> g = GT.generator()
+            >>> a = GT.generator()
             >>> _ = a.ipow(3)
             >>> g * g * g == a
             True

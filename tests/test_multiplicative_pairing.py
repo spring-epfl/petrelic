@@ -5,24 +5,24 @@ from petrelic.multiplicative.pairing import (
     G1Element,
     G2,
     G2Element,
-    Gt,
-    GtElement,
+    GT,
+    GTElement,
     NoAffineCoordinateForECPoint,
 )
 from petrelic.bn import Bn
 
 
-@pytest.fixture(params=[G1, G2, Gt])
+@pytest.fixture(params=[G1, G2, GT])
 def generator(request):
     return request.param.generator()
 
 
-@pytest.fixture(params=[G1, G2, Gt])
+@pytest.fixture(params=[G1, G2, GT])
 def group(request):
     return request.param
 
 
-@pytest.fixture(params=[G1Element, G2Element, GtElement])
+@pytest.fixture(params=[G1Element, G2Element, GTElement])
 def element(request):
     return request.param
 

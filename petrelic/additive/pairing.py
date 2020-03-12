@@ -15,18 +15,18 @@ class BilinearGroupPair:
     """
     A bilinear group pair.
 
-    Contains two origin groups G1, G2 and the image group Gt.
+    Contains two origin groups G1, G2 and the image group GT.
     """
 
     def __init__(self):
         """Initialise a bilinear group pair."""
-        self.GT = Gt()
+        self.GT = GT()
         self.G1 = G1()
         self.G2 = G2()
 
     def groups(self):
         """
-        Returns the three groups in the following order :  G1, G2, Gt.
+        Returns the three groups in the following order :  G1, G2, GT.
         """
         return self.G1, self.G2, self.GT
 
@@ -45,17 +45,17 @@ class G1Element(native.G1Element):
     group = G1
 
     def pair(self, other):
-        res = GtElement()
+        res = GTElement()
         _C.pc_map(res.pt, self.pt, other.pt)
         return res
 
 
-class Gt(native.Gt):
-    """Gt group."""
+class GT(native.GT):
+    """GT group."""
 
     @classmethod
     def _element_type(cls):
-        return GtElement
+        return GTElement
 
     @classmethod
     def sum(cls, elems):
@@ -64,8 +64,8 @@ class Gt(native.Gt):
         In the current implementation this function is not optimized.
 
         Example:
-            >>> elems = [ x * Gt.generator() for x in [10, 25, 13]]
-            >>> Gt.sum(elems) ==  (10 + 25 + 13) * Gt.generator()
+            >>> elems = [ x * GT.generator() for x in [10, 25, 13]]
+            >>> GT.sum(elems) ==  (10 + 25 + 13) * GT.generator()
             True
         """
         res = cls.neutral_element()
@@ -82,8 +82,8 @@ class Gt(native.Gt):
 
         Example:
             >>> weights = [1, 2, 3]
-            >>> elems = [ x * Gt.generator() for x in [10, 25, 13]]
-            >>> Gt.wsum(weights, elems) ==  (1 * 10 + 2 * 25 + 3 * 13) * Gt.generator()
+            >>> elems = [ x * GT.generator() for x in [10, 25, 13]]
+            >>> GT.wsum(weights, elems) ==  (1 * 10 + 2 * 25 + 3 * 13) * GT.generator()
             True
         """
         res = cls.neutral_element()
@@ -92,16 +92,16 @@ class Gt(native.Gt):
 
         return res
 
-    infinity = native.Gt.neutral_element
+    infinity = native.GT.neutral_element
 
 
-class GtElement(native.GtElement):
-    """Gt element."""
+class GTElement(native.GTElement):
+    """GT element."""
 
-    group = Gt
+    group = GT
 
     def iinverse(self):
-        """Inverse the element of Gt."""
+        """Inverse the element of GT."""
         _C.gt_inv(self.pt, self.pt)
         return self
 
@@ -109,12 +109,12 @@ class GtElement(native.GtElement):
         """Return an element which is the double of the current one.
 
         Example:
-            >>> generator = Gt.generator()
+            >>> generator = GT.generator()
             >>> elem = generator.double()
             >>> elem == generator * 2
             True
         """
-        res = GtElement()
+        res = GTElement()
         _C.gt_sqr(res.pt, self.pt)
         return res
 
@@ -122,8 +122,8 @@ class GtElement(native.GtElement):
         """Double the current element.
 
         Example:
-            >>> generator = Gt.generator()
-            >>> elem = Gt.generator().idouble()
+            >>> generator = GT.generator()
+            >>> elem = GT.generator().idouble()
             >>> elem == generator * 2
             True
         """
@@ -136,8 +136,8 @@ class GtElement(native.GtElement):
     #
 
     def __neg__(self):
-        """Return the inverse of the element of Gt."""
-        res = GtElement()
+        """Return the inverse of the element of GT."""
+        res = GTElement()
         _C.gt_inv(res.pt, self.pt)
         return res
 
@@ -145,22 +145,22 @@ class GtElement(native.GtElement):
     # Binary operators
     #
 
-    double = native.GtElement.square
-    idouble = native.GtElement.isquare
+    double = native.GTElement.square
+    idouble = native.GTElement.isquare
 
-    __add__ = native.GtElement.__mul__
-    __iadd__ = native.GtElement.__imul__
+    __add__ = native.GTElement.__mul__
+    __iadd__ = native.GTElement.__imul__
 
-    __sub__ = native.GtElement.__truediv__
-    __isub__ = native.GtElement.__itruediv__
+    __sub__ = native.GTElement.__truediv__
+    __isub__ = native.GTElement.__itruediv__
 
-    __mul__ = native.GtElement.__pow__
-    __imul__ = native.GtElement.__ipow__
+    __mul__ = native.GTElement.__pow__
+    __imul__ = native.GTElement.__ipow__
 
     @force_Bn_other
     def __rmul__(self, other):
-        res = GtElement()
-        exponent = other.mod(Gt.order())
+        res = GTElement()
+        exponent = other.mod(GT.order())
         _C.gt_exp(res.pt, self.pt, exponent.bn)
         return res
 
@@ -198,4 +198,4 @@ def pt_dec(bptype):
 # Register encoders and decoders for pairing points
 # pack.register_coders(G1Element, 114, pt_enc, pt_dec(G1Element))
 # pack.register_coders(G2Element, 115, pt_enc, pt_dec(G2Element))
-# pack.register_coders(GtElement, 116, pt_enc, pt_dec(GtElement))
+# pack.register_coders(GTElement, 116, pt_enc, pt_dec(GTElement))

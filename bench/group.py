@@ -2,7 +2,7 @@ import timeit
 import time
 import secrets
 
-from petrelic.additive.pairing import G1, G2, Gt
+from petrelic.additive.pairing import G1, G2, GT
 from petrelic.bn import Bn
 
 # WARNING: If changing from 1000 the results will no longer be in milliseconds
@@ -105,5 +105,5 @@ def bench_pair():
 if __name__ == "__main__":
     bench_group("G1", G1())
     bench_group("G2", G2())
-    bench_group("GT", Gt())
+    bench_group("GT", GT())
     bench_pair()

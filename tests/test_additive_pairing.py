@@ -1,10 +1,10 @@
 import pytest
 
-from petrelic.additive.pairing import G1, G1Element, G2, G2Element, Gt, GtElement, NoAffineCoordinateForECPoint
+from petrelic.additive.pairing import G1, G1Element, G2, G2Element, GT, GTElement, NoAffineCoordinateForECPoint
 from petrelic.bn import Bn
 
 
-@pytest.fixture(params=[G1, G2, Gt])
+@pytest.fixture(params=[G1, G2, GT])
 def group(request):
     return request.param
 
