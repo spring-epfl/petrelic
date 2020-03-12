@@ -59,6 +59,7 @@ class G1(native.G1):
         """Efficient weighted product of a number of elements
 
         In the current implementation this function is not optimized.
+
         Example:
             >>> weights = [1, 2, 3]
             >>> elems = [ G1.generator() ** x for x in [10, 25, 13]]

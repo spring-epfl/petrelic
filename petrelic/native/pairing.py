@@ -1,10 +1,8 @@
 r"""
-A native Python wrapper around RELIC's pairings
-
 This module provides a Python wrapper around RELIC's pairings using a native
-interface: operations in :py:obj:`petrelic.pairings.G1` and
-:py:obj:`petrelic.pairings.G2` are written additively, whereas operations in
-:py:obj:`petrelic.pairings.GT` are written multiplicatively.
+interface: operations in :py:obj:`petrelic.native.pairings.G1` and
+:py:obj:`petrelic.native.pairings.G2` are written additively, whereas operations in
+:py:obj:`petrelic.native.pairings.GT` are written multiplicatively.
 
 Let's see how we can use this interface to implement the Boney-Lynn-Shacham
 signature scheme for type III pairings. First we generate a private key:
