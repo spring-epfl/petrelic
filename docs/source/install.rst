@@ -53,6 +53,11 @@ Once installed, ``petrelic`` can be installed with ``pip``::
     cd petrelic
     pip3 install -v -e '.[dev]'
 
+Potentially you'll need to set your library path: ::
+
+    export LD_LIBRARY_PATH=/usr/local/lib:"$LD_LIBRARY_PATH"
+
+
 
 Building the wheels manually
 ----------------------------
@@ -79,3 +84,20 @@ will be copied on your working directory from the working directory in ``/tmp``,
 which can be installed with ``pip``::
 
     pip install petrelic-0.1.0-cp37-cp37m-manylinux2010_x86_64.whl
+
+
+Zksk Integration
+----------------
+
+This library can be integrated with `zksk`_, to do so, the ``bn-wrapper`` branch of `zksk`_ needs to be installed, and a global variable needs to be changed: ::
+
+   cd ..
+   git clone https://github.com/spring-epfl/zksk.git
+   cd zksk
+   git checkout bn-wrapper
+   sed -i 's/BACKEND\s*=\s*"openssl"/BACKEND = "relic"/' zksk/bn.py
+   cd ../petrelic
+   . venv/bin/activate
+   pip install -e ../zksk/
+
+.. _`zksk`: https://github.com/spring-epfl/zksk

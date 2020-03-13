@@ -8,9 +8,6 @@ Welcome to Petrelic's documentation!
 
 .. include::  ../../README.rst
 
-.. warning::
-   Please don't use this software for anything mission-critical. It is designed for quick protyping of privacy-enhancing technologies, not production use.
-
 .. toctree::
    :maxdepth: 2
    :caption: Basics
@@ -18,11 +15,10 @@ Welcome to Petrelic's documentation!
    quickstart
    install
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Guide
+Structure
+---------
 
-   usage
+``petrelic`` provides three interfaces, ``petrelic.native``, ``petrelic.multiplicative``, and ``petrelic.additive`` to ``RELIC`` BLS-381 curve. In addition, it provides a binding to ``RELIC``'s big number (``Bn``) interface to ease integration between the two. In general, Python's integers can be substituted for ``Bn``s, and will be automatically converted. See the reference for more details on how to use these interfaces.
 
 .. toctree::
    :maxdepth: 2
@@ -30,13 +26,6 @@ Welcome to Petrelic's documentation!
 
    petrelic.bn
    petrelic.native
-   petrelic.additive
    petrelic.multiplicative
+   petrelic.additive
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
