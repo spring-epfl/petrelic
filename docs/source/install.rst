@@ -42,11 +42,13 @@ options of the preset `x64-pbc-bn382.sh` before executing it::
     cd ..
     bash preset/00custom.sh -DCMAKE_INSTALL_PREFIX='/usr/local' .
 
-Then RELIC can be build and installed with ``make``:::
+Then RELIC can be build and installed with ``make``::
+
     make
     sudo make install
 
-Once installed, ``petrelic`` can be installed with ``pip``:::
+Once installed, ``petrelic`` can be installed with ``pip``::
+
     git clone https://github.com/spring-epfl/petrelic.git
     cd ${PETRELIC}
     pip3 install -v -e '.[dev]'
