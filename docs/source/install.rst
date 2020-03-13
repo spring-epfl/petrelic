@@ -38,7 +38,7 @@ options of the preset `x64-pbc-bn382.sh` before executing it::
 
     git clone https://github.com/relic-toolkit/relic.git
     cd relic/presets
-    sed -e 's/DSHLIB=OFF/DSHLIB=ON/' -e 's/DFP_PRIME=382/DFP_PRIME=381/' -e 's/$1/$@/' x64-pbc-bn382.sh > 00custom.sh
+    sed 's/DSHLIB=OFF/DSHLIB=ON/' preset/x64-pbc-bls381.sh > preset/00custom.sh
     cd ..
     bash preset/00custom.sh -DCMAKE_INSTALL_PREFIX='/usr/local' .
 
@@ -50,7 +50,7 @@ Then RELIC can be build and installed with ``make``::
 Once installed, ``petrelic`` can be installed with ``pip``::
 
     git clone https://github.com/spring-epfl/petrelic.git
-    cd ${PETRELIC}
+    cd petrelic
     pip3 install -v -e '.[dev]'
 
 
@@ -70,12 +70,12 @@ The other typical building tools like ``make`` or ``gcc`` are already installed
 in the ``manylinux2010`` Docker image, therefore no more dependencies are
 required to build ``petrelic``.
 
-Once Docker is installed on your system, you can build the wheel by running:::
+Once Docker is installed on your system, you can build the wheel by running::
 
     sh build.sh
 
 Once the script has finished running, which takes about 10 minutes, some wheels
 will be copied on your working directory from the working directory in ``/tmp``,
-which can be installed with ``pip``:::
+which can be installed with ``pip``::
 
     pip install petrelic-0.1.0-cp37-cp37m-manylinux2010_x86_64.whl
