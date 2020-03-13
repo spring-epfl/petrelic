@@ -13,4 +13,5 @@ petrelic.native.pairing
 .. automodule:: petrelic.native.pairing
     :members:
     :undoc-members:
+    :inherited-members:
     :exclude-members: check_same_type
