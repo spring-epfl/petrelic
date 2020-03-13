@@ -1,50 +1,41 @@
 petrelic
 ========
 
-Simple Python wrapper around RELIC
+``petrelic`` is a Python wrapper around `RELIC`_. It provides a simple python interface to the BLS-381 pairing and RELIC's big number class. Our goals is to make it easy to prototype new cryptographic applications in Python using RELIC as the backend. In the future we aim to support a few other pairing curves as well.
 
+``petrelic`` provides native, multiplicative and additive interfaces to `RELIC`_. You can use the one that you find most comfortable. ``petrelic`` overloads Python's binary operators to make computation with pairings easy. For example, here is how you would compute and verify a BLS signature using the multiplicative interface:
 
-Prerequisites
--------------
+.. code-block:: pycon
 
-RELIC is required to use this project.
+   >>> from petrelic.multiplicative.pairing import G1, G2, GT
+   >>> sk = G1.order().random()
+   >>> pk = G2.generator() ** sk
 
-To install it: ::
+   >>> # Create the signature
+   >>> m = b"Some message"
+   >>> signature = G1.hash_to_point(m) ** sk
 
-    git clone https://github.com/relic-toolkit/relic.git
-    cd relic
-    sed 's/DSHLIB=OFF/DSHLIB=ON/' preset/x64-pbc-bls381.sh > preset/00custom.sh
-    chmod +x preset/00custom.sh
-    ./preset/00custom.sh -DCMAKE_INSTALL_PREFIX=/usr/local
-    make
-    sudo make install
+   >>> # Verify the signature
+   >>> signature.pair(G2.generator()) == G1.hash_to_point(m).pair(pk)
+   True
 
-The library path might also need to be updated: ::
+You can find more information in the `documentation`_.
 
-    export LD_LIBRARY_PATH=/usr/local/lib:"$LD_LIBRARY_PATH"
+You can install ``petrelic`` on Linux using:
 
-Using a virtual environment is also advised: ::
+.. code-block:: console
 
-    virtualenv -p /usr/bin/python3 venv/
+    $ pip install petrelic
 
-Development
------------
+For full details see `the installation documentation`_.
 
-To start developing on `petrelic` create a local installation: ::
+.. warning::
+   Please don’t use this software for anything mission-critical. It is designed
+   for rapid prototyping of cryptographic primitives using `RELIC`_. We offer no
+   guarantees that the ``petrelic`` bindings are secure. We echo `RELIC`_ own
+   warning: "RELIC is at most alpha-quality software. Implementations may not be
+   correct or secure and may include patented algorithms. ... Use at your own risk."
 
-     pip3 install -v -e '.[dev]'
-
-Zksk Integration
-----------------
-
-This library can be integrated with Zksk, to do so, the bn-wrapper branch of Zksk needs to be installed, and a global variable needs to be changed: ::
-
-   cd ..
-   git clone https://github.com/spring-epfl/zksk.git
-   cd zksk
-   git checkout bn-wrapper
-   sed -i 's/BACKEND\s*=\s*"openssl"/BACKEND = "relic"/' zksk/bn.py
-   cd ../petrelic
-   . venv/bin/activate
-   pip install -e ../zksk/
-
+.. _`RELIC`: https://github.com/relic-toolkit/relic
+.. _`documentation`: https://petrelic.readthedocs.io/
+.. _`the installation documentation`: https://petrelic.readthedocs.io/en/latest/installation/
