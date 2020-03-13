@@ -3,7 +3,7 @@ Installation
 
 Coming soon:
 
-You can install ``petrelic`` with ``pip``:::
+You can install ``petrelic`` with ``pip``::
 
     pip install petrelic
 
@@ -20,7 +20,7 @@ Building petrelic on Linux
 ``petrelic`` ships ``manylinux2010`` wheels which include all binary
 dependencies. For users running a ``manylinux2010`` compatible distribution
 (that is almost all distribution with a few exceptions, the most well known
-being Alpine), ``petrelic`` can be installed trivially with ``pip``:::
+being Alpine), ``petrelic`` can be installed trivially with ``pip``::
 
     pip install petrelic
 
