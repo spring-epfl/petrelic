@@ -38,4 +38,4 @@ For full details see `the installation documentation`_.
 
 .. _`RELIC`: https://github.com/relic-toolkit/relic
 .. _`documentation`: https://petrelic.readthedocs.io/
-.. _`the installation documentation`: https://petrelic.readthedocs.io/en/latest/installation/
+.. _`the installation documentation`: https://petrelic.readthedocs.io/en/latest/install.html
