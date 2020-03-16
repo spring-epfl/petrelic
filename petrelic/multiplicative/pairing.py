@@ -40,9 +40,6 @@ True
 
 """
 
-import msgpack
-import petlib.pack as pack
-
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
 from petrelic.native.pairing import NoAffineCoordinateForECPoint

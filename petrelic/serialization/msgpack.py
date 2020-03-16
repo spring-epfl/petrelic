@@ -1,4 +1,7 @@
-# WARNING: work in progress
+# WARNING: work in progress. Do not use
+
+import msgpack
+import petlib.pack as pack
 
 def pt_enc(obj):
     """Encoder for the wrapped points."""
