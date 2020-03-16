@@ -38,7 +38,7 @@ options of the preset `x64-pbc-bn382.sh` before executing it::
 
     git clone https://github.com/relic-toolkit/relic.git
     cd relic/presets
-    sed 's/DSHLIB=OFF/DSHLIB=ON/' preset/x64-pbc-bls381.sh > preset/00custom.sh
+    sed 's/DSHLIB=OFF/DSHLIB=ON/' preset/x64-pbc-bls12-381.sh > preset/00custom.sh
     cd ..
     bash preset/00custom.sh -DCMAKE_INSTALL_PREFIX='/usr/local' .
 
