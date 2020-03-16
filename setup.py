@@ -65,5 +65,6 @@ setup(
         "Topic :: Security :: Cryptography",
         "License :: OSI Approved :: Apache Software License",
     ],
+    python_requires='>=3.6',
     zip_safe=False
 )

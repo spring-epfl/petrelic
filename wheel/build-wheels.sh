@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GMP_VERSION='6.2.0'
-PETRELIC_VERSION='0.0.0'
+PETRELIC_VERSION='0.0.2'
 
 RELIC_URL='https://github.com/relic-toolkit/relic.git'
 HOST_MOUNT="/host"
@@ -21,7 +21,7 @@ OLD_PATH="${PATH}"
 PATH="/opt/python/cp37-cp37m/bin:${PATH}"
 export PATH
 
-pip install cmake
+pip install 'cmake==3.13.3'
 
 # Build Relic
 cp -r /host/wheel/relic /tmp/relic
