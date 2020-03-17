@@ -6,7 +6,7 @@ RELIC_URL='https://github.com/relic-toolkit/relic.git'
 DOCKER_IMAGE='quay.io/pypa/manylinux1_x86_64:latest'
 
 cp -r . /tmp/petrelic
-curl -L -o "/tmp/petrelic/wheel/gmp-${GMP_VERSION}.tar.bz2" "${GMP_URL}"
+curl -sSL -o "/tmp/petrelic/wheel/gmp-${GMP_VERSION}.tar.bz2" "${GMP_URL}"
 git clone "${RELIC_URL}" /tmp/petrelic/wheel/relic
 
 docker pull "${DOCKER_IMAGE}"

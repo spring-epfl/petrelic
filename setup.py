@@ -63,8 +63,15 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Security :: Cryptography",
-        "License :: OSI Approved :: Apache Software License",
+        "License :: OSI Approved :: MIT License"
     ],
     python_requires='>=3.6',
+    data_files = [("", ["LICENSE",
+        "LICENSE.Apache-2.0",
+        "LICENSE.GMP",
+        "LICENSE.GPLv2",
+        "LICENSE.LGPL-2.1",
+        "LICENSE.LGPLv3",
+        "LICENSE.RELIC"])],
     zip_safe=False
 )
