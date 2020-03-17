@@ -39,7 +39,7 @@ setup(
     long_description=long_description,
     author=__author__,
     author_email=__email__,
-    packages=['petrelic', 'petrelic.additive', 'petrelic.petlib'],
+    packages=['petrelic', 'petrelic.additive', 'petrelic.multiplicative', 'petrelic.native', 'petrelic.petlib'],
     package_data={
         'petrelic': ['libgmp.so', 'librelic.so'],
     },
