@@ -15,8 +15,6 @@ class RelicInitializer:
             RelicInitializer.initialized = True
 
     def __initialize_relic(self):
-        print("Initializing RELIC")
-
         if _C.core_init() != RLC_OK:
             raise RuntimeError("Could not initialize RELIC core")
 
