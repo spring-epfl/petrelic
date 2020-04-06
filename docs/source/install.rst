@@ -1,8 +1,6 @@
 Installation
 ============
 
-Coming soon:
-
 You can install ``petrelic`` with ``pip``::
 
     pip install petrelic

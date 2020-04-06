@@ -18,7 +18,7 @@ Welcome to Petrelic's documentation!
 Structure
 ---------
 
-``petrelic`` provides three interfaces, ``petrelic.native``, ``petrelic.multiplicative``, and ``petrelic.additive`` to ``RELIC`` BLS-381 curve. In addition, it provides a binding to ``RELIC``'s big number (``Bn``) interface to ease integration between the two. In general, Python's integers can be substituted for ``Bn``s, and will be automatically converted. See the reference for more details on how to use these interfaces.
+``petrelic`` provides three interfaces, ``petrelic.native``, ``petrelic.multiplicative``, and ``petrelic.additive`` to ``RELIC`` BLS-381 curve. In addition, it provides a binding to ``RELIC``'s big number (``Bn``) interface to ease integration between the two. In general, Python's integers can be substituted for ``RELIC``'s big numbers, and will be automatically converted. See the reference for more details on how to use these interfaces.
 
 .. toctree::
    :maxdepth: 2
@@ -26,6 +26,7 @@ Structure
 
    petrelic.bn
    petrelic.native
-   petrelic.multiplicative
    petrelic.additive
+   petrelic.multiplicative
+   petrelic.petlib
 

@@ -9,7 +9,7 @@ The additive wrapper presents an additive interface for all three groups G1, G2,
 
 
 petrelic.additive.pairing
------------------------
+-------------------------
 
 .. automodule:: petrelic.additive.pairing
     :members:
