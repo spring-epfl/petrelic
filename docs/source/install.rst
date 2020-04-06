@@ -32,7 +32,7 @@ RELIC_ with some custom compilation options.
 .. _RELIC: https://github.com/relic-toolkit/relic
 
 The first step is to clone RELIC's Git repository, and to tweak the compilation
-options of the preset `x64-pbc-bn382.sh` before executing it::
+options of the preset ``x64-pbc-bls12-381.sh`` before executing it::
 
     git clone https://github.com/relic-toolkit/relic.git
     cd relic/presets
