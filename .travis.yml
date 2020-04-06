@@ -14,9 +14,20 @@ branches:
   only:
   - master
 
+addons:
+  apt:
+    packages:
+      - clang
+      - cmake
+      - cmake-data
+      - gcc
+      - python-dev
+      - libgmp10
+      - libgmp-dev
+      - libssl-dev
+      - libffi-dev
+
 install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq python-dev libgmp10 libgmp-dev libssl-dev libffi-dev
   - bash ./travis/build_relic.sh
   - pip3 install -v -e '.[dev]'
 

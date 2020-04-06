@@ -21,7 +21,7 @@ then
     exit 1
 fi
 
-sed 's/DSHLIB=OFF/DSHLIB=ON/' preset/x64-pbc-bls12-381.sh > preset/00custom.sh
+sed -e 's/DSHLIB=OFF/DSHLIB=ON/' -e 's/DSTBIN=ON/DSTBIN=off/'  -e 's/$1/$@/' preset/x64-pbc-bls12-381.sh > preset/00custom.sh
 
 bash preset/00custom.sh -DCMAKE_INSTALL_PREFIX='/usr/local' .
 make
