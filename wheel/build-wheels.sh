@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GMP_VERSION='6.2.0'
-PETRELIC_VERSION='0.1.0'
+PETRELIC_VERSION='0.1.1'
 
 RELIC_URL='https://github.com/relic-toolkit/relic.git'
 HOST_MOUNT="/host"
