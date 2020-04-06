@@ -28,6 +28,7 @@ addons:
       - libffi-dev
 
 install:
+  - export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
   - bash ./travis/build_relic.sh
   - pip3 install -v -e '.[dev]'
 
