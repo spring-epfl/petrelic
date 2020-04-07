@@ -610,7 +610,7 @@ class Bn(object):
 
         if _C.bn_sign(n.bn) == _C.CONST_RLC_NEG:
             base = base.mod_inverse(modulo)
-            _C.bn_neg(n.bn)
+            _C.bn_neg(n.bn, n.bn)
 
         if _C.bn_is_zero(n.bn) == 1:
             return Bn(1)
