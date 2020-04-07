@@ -4,6 +4,9 @@ petrelic
 .. image:: https://travis-ci.org/spring-epfl/petrelic.svg?branch=master
     :target: https://travis-ci.org/spring-epfl/petrelic
 
+.. image:: https://codecov.io/gh/spring-epfl/petrelic/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/spring-epfl/petrelic
+
 ``petrelic`` is a Python wrapper around `RELIC`_. It provides a simple python interface to the BLS-381 pairing and RELIC's big number class. Our goals is to make it easy to prototype new cryptographic applications in Python using RELIC as the backend. In the future we aim to support a few other pairing curves as well.
 
 ``petrelic`` provides native, multiplicative and additive interfaces to `RELIC`_. You can use the one that you find most comfortable. ``petrelic`` overloads Python's binary operators to make computation with pairings easy. For example, here is how you would compute and verify a BLS signature using the multiplicative interface:
