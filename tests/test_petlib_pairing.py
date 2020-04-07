@@ -1,4 +1,14 @@
-from petrelic.petlib.pairing import G1Group, G1Elem, G2Group, G2Elem, GTGroup, GTElem
+import copy
+
+from petrelic.petlib.pairing import (
+    BilinearGroupPair,
+    G1Group,
+    G1Elem,
+    G2Group,
+    G2Elem,
+    GTGroup,
+    GTElem
+)
 from petrelic.bn import Bn
 
 import pytest
@@ -10,6 +20,25 @@ def group(request):
         return G1Group()
     if request.param == "G2":
         return G2Group()
+
+
+def test_bgp():
+    bgp = BilinearGroupPair()
+    groups = bgp.groups()
+
+    assert isinstance(groups[0], G1Group)
+    assert isinstance(groups[1], G2Group)
+    assert isinstance(groups[2], GTGroup)
+
+
+def test_copy(group):
+    elem = 42 * group.generator()
+    elem_copy = copy.copy(elem)
+
+    assert elem == elem_copy
+
+    elem += group.generator()
+    assert elem != elem_copy
 
 
 def test_check_point(group):

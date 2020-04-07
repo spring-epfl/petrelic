@@ -1,6 +1,7 @@
 import pytest
 
 from petrelic.multiplicative.pairing import (
+    BilinearGroupPair,
     G1,
     G1Element,
     G2,
@@ -25,6 +26,15 @@ def group(request):
 @pytest.fixture(params=[G1Element, G2Element, GTElement])
 def element(request):
     return request.param
+
+
+def test_bgp():
+    bgp = BilinearGroupPair()
+    groups = bgp.groups()
+
+    assert isinstance(groups[0], G1)
+    assert isinstance(groups[1], G2)
+    assert isinstance(groups[2], GT)
 
 
 def test_order(group):
@@ -101,6 +111,7 @@ def test_mul_pow(group):
 def test_pow_identity(group):
     g = group.generator()
     assert group.neutral_element() == g ** 0
+    assert group.unity() == group.neutral_element()
 
 
 def test_pow_inverse(group):

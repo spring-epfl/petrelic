@@ -5,6 +5,14 @@ from copy import copy, deepcopy
 
 
 def test_bn_constructors():
+    assert Bn.from_num(100) == 100
+    assert Bn.from_num(-100) == -100
+
+    assert Bn.from_num(Bn(100)) == 100
+    assert Bn.from_num(Bn(-100)) == -100
+
+    assert Bn.from_num("100") == NotImplemented
+
     assert Bn.from_decimal("100") == 100
     assert Bn.from_decimal("-100") == -100
 
@@ -53,11 +61,12 @@ def test_bn_large_negative_integer():
 
 
 def test_bn_prime():
-    p = Bn.get_prime(128)
-    assert p > Bn(0)
-    assert p.is_prime()
-    assert not Bn(16).is_prime()
-    assert p.num_bits() > 127
+    for safe in (0, 1):
+        p = Bn.get_prime(128, safe=safe)
+        assert p > Bn(0)
+        assert p.is_prime()
+        assert not Bn(16).is_prime()
+        assert p.num_bits() > 127
 
 
 def test_bn_arithmetic():
@@ -95,6 +104,12 @@ def test_bn_arithmetic():
     assert pow(Bn(2), Bn(8), Bn(27)) == Bn(2 ** 8 % 27)
 
     pow(Bn(10), Bn(10)).binary()
+    with pytest.raises(Exception):
+        pow(Bn(10), -1)
+
+    assert pow(Bn(2), -1, 27) == 14
+
+    assert pow(Bn(2), 0, 27) == 1
 
     assert pow(Bn(2), 8, 27) == 2 ** 8 % 27
 

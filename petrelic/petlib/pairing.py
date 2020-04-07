@@ -16,9 +16,9 @@ class BilinearGroupPair:
     """
 
     def __init__(self):
-        self.GT = GTGroup(self)
-        self.G1 = G1Group(self)
-        self.G2 = G2Group(self)
+        self.GT = GTGroup()
+        self.G1 = G1Group()
+        self.G2 = G2Group()
 
     def groups(self):
         """

@@ -1,4 +1,15 @@
-from petrelic.native.pairing import G1, G1Element, G2, G2Element, GT, GTElement, NoAffineCoordinateForECPoint
+import copy
+
+from petrelic.native.pairing import (
+    BilinearGroupPair,
+    G1,
+    G1Element,
+    G2,
+    G2Element,
+    GT,
+    GTElement,
+    NoAffineCoordinateForECPoint
+)
 from petrelic.bn import Bn
 
 import pytest
@@ -12,14 +23,44 @@ def group(request):
 def element(request):
     return request.param
 
+
+def test_bgp():
+    bgp = BilinearGroupPair()
+    groups = bgp.groups()
+
+    assert isinstance(groups[0], G1)
+    assert isinstance(groups[1], G2)
+    assert isinstance(groups[2], GT)
+
+
 def test_is_valid(group):
     assert group.generator().is_valid()
     assert (100 * group.generator()).is_valid()
 
 
 def test_is_valid_gt():
+    assert GT.unity().is_valid()
     assert GT.generator().is_valid()
     assert (GT.generator() ** 100).is_valid()
+
+def test_copy(group):
+    elem = 42 * group.generator()
+    elem_copy = copy.copy(elem)
+
+    assert elem == elem_copy
+
+    elem += group.generator()
+    assert elem != elem_copy
+
+
+def test_copy_gt():
+    elem = GT.generator() ** 42
+    elem_copy = copy.copy(elem)
+
+    assert elem == elem_copy
+
+    elem *= GT.generator()
+    assert elem != elem_copy
 
 
 def test_hash_to_point_G1(group):
@@ -49,6 +90,8 @@ def test_ec_from_x(group):
 
 def test_ec_arithmetic(group):
     g = group.generator()
+    assert not g == 5
+    assert g != 5
     assert g + g == g + g
     assert g + g == g.double()
     assert g + g == Bn(2) * g
@@ -59,6 +102,14 @@ def test_ec_arithmetic(group):
     d = {}
     d[2 * g] = 2
     assert d[2 * g] == 2
+
+    q = group.generator()
+    q *= 10
+
+    assert q == g * 10
+
+    q *= 10
+    assert q == g * 10 * 10
 
     # Test long names
     assert (g + g).eq(g + g)
@@ -71,6 +122,8 @@ def test_ec_arithmetic(group):
 
 def test_gt_multiplication():
     g = GT.generator()
+    assert not g == 5
+    assert g != 5
     assert g * g == g * g
     assert g * g == g.square()
     assert g * g == g ** Bn(2)

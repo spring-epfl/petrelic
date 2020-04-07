@@ -1,6 +1,15 @@
 import pytest
 
-from petrelic.additive.pairing import G1, G1Element, G2, G2Element, GT, GTElement, NoAffineCoordinateForECPoint
+from petrelic.additive.pairing import (
+    BilinearGroupPair,
+    G1,
+    G1Element,
+    G2,
+    G2Element,
+    GT,
+    GTElement,
+    NoAffineCoordinateForECPoint
+)
 from petrelic.bn import Bn
 
 
@@ -12,13 +21,21 @@ def group(request):
 def element(request):
     return request.param
 
+def test_bgp():
+    bgp = BilinearGroupPair()
+    groups = bgp.groups()
+
+    assert isinstance(groups[0], G1)
+    assert isinstance(groups[1], G2)
+    assert isinstance(groups[2], GT)
+
 
 def test_is_valid(group):
     assert group.generator().is_valid()
     assert (100 * group.generator()).is_valid()
 
 
-def test_hash_to_point_G1(group):
+def test_hash_to_point_G1():
     h1 = G1.hash_to_point(b'foo')
     assert isinstance(h1, G1Element)
     h2 = G1.hash_to_point(b'bar')
@@ -26,7 +43,7 @@ def test_hash_to_point_G1(group):
     assert h1 != h2
 
 
-def test_hash_to_point_G2(group):
+def test_hash_to_point_G2():
     h1 = G2.hash_to_point(b'foo')
     assert isinstance(h1, G2Element)
     h2 = G2.hash_to_point(b'bar')
@@ -65,6 +82,8 @@ def test_ec_arithmetic(group):
     assert len(str(g)) > 0
 
     neutral_element = group.neutral_element()
+
+    assert group.infinity() == neutral_element
 
     assert g + neutral_element == g
     assert neutral_element + neutral_element == neutral_element
