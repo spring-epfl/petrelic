@@ -1,10 +1,15 @@
-"""Petlib compatible API of the petrelic library.
+r"""
+This module provides a Python wrapper around RELIC's pairings using petlib's
+interface: operations in :py:obj:`petrelic.native.pairings.G1` and
+:py:obj:`petrelic.native.pairings.G2` are written additively, whereas operations in
+:py:obj:`petrelic.native.pairings.GT` are written multiplicatively.
+
 """
 from petrelic.bindings import _FFI, _C
 from petrelic.bn import Bn, force_Bn_other
-import petrelic.constants as consts
+from petrelic.native.pairing import NoAffineCoordinateForECPoint
 
-from binascii import hexlify
+import petrelic.native.pairing as native
 
 
 class BilinearGroupPair:
@@ -27,42 +32,12 @@ class BilinearGroupPair:
         return self.G1, self.G2, self.GT
 
 
-class G1Group:
-    def __init__(self):
-        pass
-
-    def generator(self):
-        """Returns the generator of the EC group."""
-
-        pt = G1Elem()
-        _C.g1_get_gen(pt.pt)
-        pt._is_gen = True
-        return pt
-
-    def infinite(self):
-        """Returns a point at infinity.
-
-        Example:
-            >>> G = G1Group()
-            >>> G.generator() + G.infinite() == G.generator() ## Should hold.
-            True
-        """
-        pt = G1Elem()
-        _C.g1_set_infty(pt.pt)
-        return pt
-
-    def order(self):
-        """Returns the order of the group as a Big Number.
-
-        Example:
-            >>> G = G1Group()
-            >>> G.order() * G.generator() == G.infinite() ## Should hold.
-            True
-        """
-
-        ord = Bn()
-        _C.g1_get_ord(ord.bn)
-        return ord
+class G1Group(native.G1):
+    """G1 group"""
+    
+    @classmethod
+    def _element_type(cls):
+        return G1Elem
 
     def check_point(self, pt):
         """Ensures the point is on the curve.
@@ -74,220 +49,36 @@ class G1Group:
             >>> G.check_point(G.infinite())
             True
         """
-        return bool(_C.g1_is_valid(pt.pt))
+        return type(pt) == self._element_type() and pt.is_valid()
 
-    def sum(self, elems):
-        """Sums a number of elements (not optimized)"""
+    @classmethod
+    def infinite(cls):
+        """The point at infinity.
 
-        res = G1Group().infinite()
-        for el in elems:
-            res += el
-
-        return res
-
-    def wsum(self, weights, elems):
-        """Sums a number of elements (not optimized)"""
-
-        # TODO: can be optimized a little by doing groups of 2
-        res = G1Group().infinite()
-        for w, el in zip(weights, elems):
-            res += w * el
-
-        return res
-
-    def hash_to_point(self, hinput):
-        """Hash a byte string into an EC Point."""
-        res = G1Elem()
-        _C.g1_map(res.pt, hinput, len(hinput))
-
+        Alias for :py:meth:`G1.neutral_element`
+        """
+        return cls.neutral_element()
     # Not implemented: list_curves(), parameters(), get_points_from_x
 
 
-class G1Elem:
+class G1Elem(native.G1Element):
+    """Element of the G1 group"""
 
-    __slots__ = ["pt", "_is_gen"]
+    group = G1Group
 
-    @staticmethod
-    def from_binary(sbin, group=None):
-        """Create a point from a byte sequence.
-
-        It accepts (but ignores) group as extra argument.
-
-        Example:
-            >>> G = G1Group()
-            >>> byte_string = G.generator().export()                # Export EC point as byte string
-            >>> G1Elem.from_binary(byte_string, G) == G.generator()    # Import EC point from binary string
-            True
-            >>> G1Elem.from_binary(byte_string, G) == G.generator()    # Import EC point from binary string
-            True
-        """
-
-        ret = G1Elem()
-        _C.g1_read_bin(ret.pt, sbin, len(sbin))
-        return ret
-
-    def __init__(self):
-        """Initialize a new g1 element"""
-        self.pt = _FFI.new("g1_t")
-        self._is_gen = False
-        _C.g1_null(self.pt)
-        _C.g1_new(self.pt)
-
-    def __copy__(self):
-        new = G1Elem()
-        _C.g1_copy(new.pt, self.pt)
-        new._is_gen = self._is_gen
-        return new
-
-    def pt_add(self, other):
-        """Adds two points together. Synonym with self + other.
-
-        Example:
-            >>> g = G1Group().generator()
-            >>> g.pt_add(g) == (g + g) == (2 * g) == g.pt_double() # Equivalent formulations
-            True
-        """
-        return self.__add__(other)
-
-    def pt_add_inplace(self, other):
-        """Adds two points together and puts the result in self.pt.
-        """
-        return self.__iadd__(other)
-
-    def __add__(self, other):
-        res = G1Elem()
-        _C.g1_add(res.pt, self.pt, other.pt)
-        return res
-
-    def __iadd__(self, other):
-        self._is_gen = False
-        _C.g1_add(self.pt, self.pt, other.pt)
-        return self
-
-    def pt_sub(self, other):
-        """Subtract two points. Synonym with self - other.
-
-        Example:
-            >>> g = G1Group().generator()
-            >>> g.pt_sub(g) == G1Group().infinite()
-            True
-        """
-        return self.__sub__(other)
-
-    def __sub__(self, other):
-        res = G1Elem()
-        _C.g1_sub(res.pt, self.pt, other.pt)
-        return res
-
-    def __isub__(self, other):
-        self._is_gen = False
-        _C.g1_sub(self.pt, self.pt, other.pt)
-        return self
-
-    def pt_double(self):
-        res = G1Elem()
-        _C.g1_dbl(res.pt, self.pt)
-        return res
-
-    def pt_double_inplace(self):
-        self._is_gen = False
-        _C.g1_dbl(self.pt, self.pt)
-        return self
-
-    def pt_neg(self):
-        """Returns the negative of the point. Synonym with -self.
-
-        Example:
-            >>> G = G1Group()
-            >>> g = G.generator()
-            >>> g + (-g) == G.infinite() # Unary negative operator.
-            True
-            >>> g - g == G.infinite()    # Binary negative operator.
-            True
-        """
-
-        return self.__neg__()
-
-    def pt_neg_inplace(self):
-        # result = copy(self)
-        return self.__ineg__()
-
-    def __neg__(self):
-        # result = copy(self)
-        res = G1Elem()
-        _C.g1_neg(res.pt, self.pt)
-        return res
-
-    def __ineg__(self):
-        self._is_gen = False
-        _C.g1_neg(self.pt, self.pt)
-        return self
-
-    def pt_mul(self, scalar):
-        """Returns the product of the point with a scalar (not commutative). Synonym with scalar * self.
-
-        Example:
-            >>> G = G1Group()
-            >>> g = G.generator()
-            >>> 100 * g == g.pt_mul(100) # Operator and function notation mean the same
-            True
-            >>> G.order() * g == G.infinite() # Scalar mul. by the order returns the identity element.
-            True
-        """
-        return self.__rmul__(scalar)
-
-    @force_Bn_other
-    def pt_mul_inplace(self, scalar):
-        """ Multiplies a scalar with a point and mutates the point to hold the result.
-        """
-        self._is_gen = False
-        _C.g1_mul(self.pt, self.pt, scalar.bn)
-        return self
-
-    @force_Bn_other
-    def __rmul__(self, other):
-        res = G1Elem()
-        if self._is_gen:
-            _C.g1_mul_gen(res.pt, other.bn)
-        else:
-            _C.g1_mul(res.pt, self.pt, other.bn)
-        return res
-
-    def pt_eq(self, other):
-        """Returns a boolean denoting whether the points are equal. Synonym with self == other.
-
-        Example:
-            >>> G = G1Group()
-            >>> g = G.generator()
-            >>> 40 * g + 60 * g == 100 * g
-            True
-            >>> g == 2 * g
-            False
-        """
-        return self.__eq__(other)
-
-    def __eq__(self, other):
-        if not isinstance(other, G1Elem):
-            return False
-
-        return _C.g1_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def is_infinite(self):
-        """Returns True if this point is at infinity, otherwise False.
-
-        Example:
-            >>> G = G1Group()
-            >>> g, o = G.generator(), G.order()
-            >>> (o * g).is_infinite()
-            True
-            >>> G.infinite().is_infinite()
-            True
-        """
-        _C.g1_norm(self.pt, self.pt)
-        return bool(_C.g1_is_infty(self.pt))
+    pt_add = native.G1Element.__add__
+    pt_add_inplace = native.G1Element.__iadd__
+    pt_sub = native.G1Element.__sub__
+    pt_double = native.G1Element.double
+    pt_double_inplace = native.G1Element.idouble
+    pt_neg = native.G1Element.__neg__
+    pt_neg_inplace = native.G1Element.iinverse
+    pt_mul = native.G1Element.__mul__
+    pt_mul_inplace = native.G1Element.__imul__
+    pt_eq = native.G1Element.__eq__
+    is_infinite = native.G1Element.is_neutral_element
+    export = native.G1Element.to_binary
+    get_affine = native.G1Element.get_affine_coordinates
 
     def pair(self, other):
         """Computes bilinear pairing with self and otherwise
@@ -304,25 +95,13 @@ class G1Elem:
             >>> p.pair(q) == GT.generator() ** 20000
             True
         """
+        if not type(other) == G2Elem:
+            raise TypeError("Second parameter should be of type G2Elem is {}".format(type(other)))
+
         res = GTElem()
         _C.pc_map(res.pt, self.pt, other.pt)
         return res
 
-    def export(self, compressed=True):
-        """ Returns a string binary representation of the point in compressed coordinates.
-
-        Example:
-            >>> G = G1Group()
-            >>> pt = 10 * G.generator()
-            >>> byte_string = pt.export()
-            >>> G1Elem.from_binary(byte_string) == pt
-            True
-        """
-        flag = int(compressed)
-        length = _C.g1_size_bin(self.pt, flag)
-        buf = _FFI.new("char[]", length)
-        _C.g1_write_bin(buf, length, self.pt, flag)
-        return _FFI.unpack(buf, length)
 
     def _get_coords(self):
         x, y, z = Bn(), Bn(), Bn()
@@ -331,26 +110,11 @@ class G1Elem:
         _C.fp_prime_back(z.bn, self.pt[0].z)
         return (x, y, z)
 
-    def __hash__(self):
-        return self.export().__hash__()
 
-    def get_affine(self):
-        """Return the affine coordinates (x,y) of this EC Point.
+    @classmethod
+    def from_binary(cls, sbin, group=None):
+        return super().from_binary(sbin)
 
-        Example:
-            >>> G = G1Group()
-            >>> g = G.generator()
-            >>> x, y = g.get_affine()
-            >>> x
-            Bn(3685416753713387016781088315183077757961620795782546409894578378688607592378376318836054947676345821548104185464507)
-            >>> y
-            Bn(1339506544944476473020471379941921221584933875938349620426543736416511423956333506472724655353366534992391756441569)
-        """
-        if self.is_infinite():
-            raise Exception("EC Infinity has no affine coordinates.")
-
-        x, y, _ = self._get_coords()
-        return (x, y)
 
     def __repr__(self):
         """ Representation of G1Point
@@ -365,41 +129,13 @@ class G1Elem:
         return "G1Elem({}, {}, {})".format(x, y, z)
 
 
-class G2Group:
-    def __init__(self):
-        pass
+class G2Group(native.G2):
+    """G2 group"""
 
-    def generator(self):
-        """Returns the generator of the EC group."""
+    @classmethod
+    def _element_type(cls):
+        return G2Elem
 
-        pt = G2Elem()
-        _C.g2_get_gen(pt.pt)
-        return pt
-
-    def infinite(self):
-        """Returns a point at infinity.
-
-        Example:
-            >>> G = G2Group()
-            >>> G.generator() + G.infinite() == G.generator() ## Should hold.
-            True
-        """
-        pt = G2Elem()
-        _C.g2_set_infty(pt.pt)
-        return pt
-
-    def order(self):
-        """Returns the order of the group as a Big Number.
-
-        Example:
-            >>> G = G2Group()
-            >>> G.order() * G.generator() == G.infinite() ## Should hold.
-            True
-        """
-
-        ord = Bn()
-        _C.g2_get_ord(ord.bn)
-        return ord
 
     def check_point(self, pt):
         """Ensures the point is on the curve.
@@ -411,281 +147,59 @@ class G2Group:
             >>> G.check_point(G.infinite())
             True
         """
-        return bool(_C.g2_is_valid(pt.pt))
-
-    def sum(self, elems):
-        """Sums a number of elements (not optimized)"""
-
-        res = G2Group().infinite()
-        for el in elems:
-            res += el
-
-        return res
-
-    def wsum(self, weights, elems):
-        """Sums a number of elements (not optimized)"""
-
-        # TODO: can be optimized a little by doing groups of 2
-        res = G2Group().infinite()
-        for w, el in zip(weights, elems):
-            res += w * el
-
-        return res
-
-    def hash_to_point(self, hinput):
-        """Hash a byte string into an EC Point."""
-        res = G2Elem()
-        _C.g2_map(res.pt, hinput, len(hinput))
-
-    # Not implemented: list_curves(), parameters(), get_points_from_x
+        return type(pt) == self._element_type() and pt.is_valid()
 
 
-class G2Elem:
+    @classmethod
+    def infinite(cls):
+        """The point at infinity.
 
-    __slots__ = ["pt"]
-
-    @staticmethod
-    def from_binary(sbin, group=None):
-        """Create a point from a byte sequence.
-
-        It accepts (but ignores) group as extra argument.
-
-        Example:
-            >>> G = G2Group()
-            >>> byte_string = G.generator().export()                # Export EC point as byte string
-            >>> G2Elem.from_binary(byte_string, G) == G.generator()    # Import EC point from binary string
-            True
-            >>> G2Elem.from_binary(byte_string, G) == G.generator()    # Import EC point from binary string
-            True
+        Alias for :py:meth:`G2.neutral_element`
         """
+        return cls.neutral_element()
 
-        ret = G2Elem()
-        _C.g2_read_bin(ret.pt, sbin, len(sbin))
-        return ret
 
-    def __init__(self):
-        """Initialize a new g1 element"""
-        self.pt = _FFI.new("g2_t")
-        _C.g2_null(self.pt)
-        _C.g2_new(self.pt)
+class G2Elem(native.G2Element):
+    """Element of the G2 group"""
 
-    def __copy__(self):
-        new = G2Elem()
-        _C.g2_copy(new.pt, self.pt)
-        return new
+    group = G1Group
 
-    def pt_add(self, other):
-        """Adds two points together. Synonym with self + other.
+    pt_add = native.G2Element.__add__
+    pt_add_inplace = native.G2Element.__iadd__
+    pt_sub = native.G2Element.__sub__
+    pt_double = native.G2Element.double
+    pt_double_inplace = native.G2Element.idouble
+    pt_neg = native.G2Element.__neg__
+    pt_neg_inplace = native.G2Element.iinverse
+    pt_mul = native.G2Element.__mul__
+    pt_mul_inplace = native.G2Element.__imul__
+    pt_eq = native.G2Element.__eq__
+    is_infinite = native.G2Element.is_neutral_element
+    export = native.G2Element.to_binary
 
-        Example:
-            >>> g = G2Group().generator()
-            >>> g.pt_add(g) == (g + g) == (2 * g) == g.pt_double() # Equivalent formulations
-            True
-        """
-        return self.__add__(other)
-
-    def pt_add_inplace(self, other):
-        """Adds two points together and puts the result in self.pt.
-        """
-        return self.__iadd__(other)
-
-    def __add__(self, other):
-        res = G2Elem()
-        _C.g2_add(res.pt, self.pt, other.pt)
-        return res
-
-    def __iadd__(self, other):
-        _C.g2_add(self.pt, self.pt, other.pt)
-        return self
-
-    def pt_sub(self, other):
-        """Subtract two points. Synonym with self - other.
-
-        Example:
-            >>> g = G2Group().generator()
-            >>> g.pt_sub(g) == G2Group().infinite()
-            True
-        """
-        return self.__sub__(other)
-
-    def __sub__(self, other):
-        res = G2Elem()
-        _C.g2_sub(res.pt, self.pt, other.pt)
-        return res
-
-    def __isub__(self, other):
-        _C.g2_sub(self.pt, self.pt, other.pt)
-        return self
-
-    def pt_double(self):
-        res = G2Elem()
-        _C.g2_dbl(res.pt, self.pt)
-        return res
-
-    def pt_double_inplace(self):
-        _C.g2_dbl(self.pt, self.pt)
-        return self
-
-    def pt_neg(self):
-        """Returns the negative of the point. Synonym with -self.
-
-        Example:
-            >>> G = G2Group()
-            >>> g = G.generator()
-            >>> g + (-g) == G.infinite() # Unary negative operator.
-            True
-            >>> g - g == G.infinite()    # Binary negative operator.
-            True
-        """
-
-        return self.__neg__()
-
-    def pt_neg_inplace(self):
-        # result = copy(self)
-        _C.g2_neg(self.pt, self.pt)
-        return self
-
-    def __neg__(self):
-        # result = copy(self)
-        res = G2Elem()
-        _C.g2_neg(res.pt, self.pt)
-        return res
-
-    def __ineg__(self):
-        _C.g2_neg(self.pt, self.pt)
-        return self
-
-    def pt_mul(self, scalar):
-        """Returns the product of the point with a scalar (not commutative). Synonym with scalar * self.
-
-        Example:
-            >>> G = G2Group()
-            >>> g = G.generator()
-            >>> 100 * g == g.pt_mul(100) # Operator and function notation mean the same
-            True
-            >>> G.order() * g == G.infinite() # Scalar mul. by the order returns the identity element.
-            True
-        """
-        return self.__rmul__(scalar)
-
-    @force_Bn_other
-    def pt_mul_inplace(self, scalar):
-        """ Multiplies a scalar with a point and mutates the point to hold the result.
-        """
-        _C.g2_mul(self.pt, self.pt, scalar.bn)
-        return self
-
-    @force_Bn_other
-    def __rmul__(self, other):
-        res = G2Elem()
-        _C.g2_mul(res.pt, self.pt, other.bn)
-        return res
-
-    def pt_eq(self, other):
-        """Returns a boolean denoting whether the points are equal. Synonym with self == other.
-
-        Example:
-            >>> G = G2Group()
-            >>> g = G.generator()
-            >>> 40 * g + 60 * g == 100 * g
-            True
-            >>> g == 2 * g
-            False
-        """
-        return self.__eq__(other)
-
-    def __eq__(self, other):
-        if not isinstance(other, G2Elem):
-            return False
-
-        return _C.g2_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def is_infinite(self):
-        """Returns True if this point is at infinity, otherwise False.
-
-        Example:
-            >>> G = G2Group()
-            >>> g, o = G.generator(), G.order()
-            >>> (o * g).is_infinite()
-            True
-            >>> G.infinite().is_infinite()
-            True
-        """
-        _C.g2_norm(self.pt, self.pt)
-        return bool(_C.g2_is_infty(self.pt))
-
-    def export(self, compressed=True):
-        """ Returns a string binary representation of the point in compressed coordinates.
-
-        Example:
-            >>> G = G2Group()
-            >>> pt = 10 * G.generator()
-            >>> byte_string = pt.export()
-            >>> G2Elem.from_binary(byte_string) == pt
-            True
-        """
-        flag = int(compressed)
-        length = _C.g2_size_bin(self.pt, flag)
-        buf = _FFI.new("char[]", length)
-        _C.g2_write_bin(buf, length, self.pt, flag)
-        return _FFI.unpack(buf, length)
-
-    def __hash__(self):
-        return self.export().__hash__()
+    @classmethod
+    def from_binary(cls, sbin, group=None):
+        return super().from_binary(sbin)
 
     def __repr__(self):
         """ Representation of G2Point
-
         Examples:
             >>> G2Group().infinite()
             G2Elem(00)
             >>> G2Group().generator()
             G2Elem(02024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb813e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e)
         """
-        hx = hexlify(self.export()).decode("utf-8")
-        return "G2Elem({})".format(hx)
+        pt_hex = self.to_binary().hex()
+        return "G2Elem({})".format(pt_hex)
 
 
-class GTGroup:
-    def __init__(self):
-        pass
+class GTGroup(native.GT):
+    """GT group"""
 
-    def generator(self):
-        """Returns the generator of the group."""
+    @classmethod
+    def _element_type(cls):
+        return GTElem
 
-        pt = GTElem()
-        _C.gt_get_gen(pt.pt)
-        return pt
-
-    def unity(self):
-        """Returns the unity element
-
-        Example:
-            >>> G = GTGroup()
-            >>> G.generator() * G.unity() == G.generator() ## Should hold.
-            True
-        """
-        pt = GTElem()
-        _C.gt_set_unity(pt.pt)
-        return pt
-
-    def order(self):
-        """Returns the order of the group as a Big Number.
-
-        Example:
-            >>> G = GTGroup()
-            >>> G.generator() ** G.order() == G.unity() ## Should hold.
-            True
-        """
-
-        ord = Bn()
-        _C.gt_get_ord(ord.bn)
-        return ord
-
-    # TODO: was check_point
     def check_elem(self, pt):
         """Ensures the element is an element of the group
 
@@ -696,40 +210,28 @@ class GTGroup:
             >>> G.check_elem(G.unity())
             True
         """
-        # TODO: for some reason gt_is_valid doesn't accept unity
-        if pt == self.unity():
-            return True
 
-        return bool(_C.gt_is_valid(pt.pt))
-
-    def prod(self, elems):
-        """Product of a number of elements (not optimized)"""
-
-        res = GTGroup().unity()
-        for el in elems:
-            res *= el
-
-        return res
-
-    def wprod(self, weights, elems):
-        """Weighted product of a number of elements (not optimized)"""
-
-        # TODO: can be optimized a little by doing groups of 2
-        res = GTGroup().unity()
-        for w, el in zip(weights, elems):
-            res *= el ** w
-
-        return res
+        return type(pt) == self._element_type() and pt.is_valid()
 
     # Not implemented: list_curves(), parameters(), get_points_from_x
 
 
-class GTElem:
+class GTElem(native.GTElement):
+    """GT element"""
 
-    __slots__ = ["pt"]
+    group = GTGroup
 
-    @staticmethod
-    def from_binary(sbin, group=None):
+    mul_inplace = native.GTElement.__imul__
+    inv = native.GTElement.inverse
+    inv_inplace = native.GTElement.iinverse
+    sqr = native.GTElement.square
+    sqr_inplace = native.GTElement.isquare
+    exp = native.GTElement.__pow__
+    exp_inplace = native.GTElement.__ipow__
+    export = native.GTElement.to_binary
+
+    @classmethod
+    def from_binary(cls, sbin, group=None):
         """Create an element from a byte sequence.
 
         It accepts (but ignores) group as extra argument.
@@ -743,202 +245,14 @@ class GTElem:
             True
         """
 
-        ret = GTElem()
-        _C.gt_read_bin(ret.pt, sbin, len(sbin))
-        return ret
+        return super().from_binary(sbin)
 
-    def __init__(self):
-        """Initialize a new g1 element"""
-        self.pt = _FFI.new("gt_t")
-        _C.gt_null(self.pt)
-        _C.gt_new(self.pt)
-
-    def __copy__(self):
-        new = GTElem()
-        _C.gt_copy(new.pt, self.pt)
-        return new
-
-    def mul(self, other):
-        """Multiplies two elements together. Synonym with self * other.
-
-        Example:
-            >>> g = GTGroup().generator()
-            >>> g.mul(g) == (g * g) == (g ** 2) == g.sqr() # Equivalent formulations
-            True
-        """
-        return self.__mul__(other)
-
-    def mul_inplace(self, other):
-        """Adds two points together and puts the result in self.pt.
-        """
-        return self.__imul__(other)
-
-    def __mul__(self, other):
-        res = GTElem()
-        _C.gt_mul(res.pt, self.pt, other.pt)
-        return res
-
-    def __imul__(self, other):
-        _C.gt_mul(self.pt, self.pt, other.pt)
-        return self
-
-    def div(self, other):
-        """Subtract two points. Synonym with self - other.
-
-        Example:
-            >>> g = GTGroup().generator()
-            >>> g.div(g) == GTGroup().unity()
-            True
-        """
-        return self.__truediv__(other)
-
-    def __truediv__(self, other):
-        res = other.inv()
-        _C.gt_mul(res.pt, self.pt, res.pt)
-        return res
-
-    def __itruediv__(self, other):
-        otherinv = other.inv()
-        _C.gt_mul(self.pt, self.pt, otherinv.pt)
-        return self
-
-    def __floordiv__(self, other):
-        return self.__truediv__(other)
-
-    def __ifloordiv__(self, other):
-        return self.__itruediv__(other)
-
-    def inv(self):
-        """Returns the inverse of the element. Synonym with self ** -1.
-
-        Example:
-            >>> G = GTGroup()
-            >>> g = G.generator()
-            >>> g * g.inv() == G.unity()    # Inversion function
-            True
-            >>> g * (g ** -1) == G.unity()    # Unary negative operator.
-            True
-            >>> g / g == G.unity()          # Binary operator
-            True
-        """
-        res = GTElem()
-        _C.gt_inv(res.pt, self.pt)
-        return res
-
-    def inv_inplace(self):
-        """Inverts the elements, and puts the result in self"""
-        _C.gt_inv(self.pt, self.pt)
-        return self
-
-    def sqr(self):
-        """Squares the element
-
-        Example:
-            >>> g = GTGroup().generator()
-            >>> g.sqr() == g * g
-            True
-        """
-        res = GTElem()
-        _C.gt_sqr(res.pt, self.pt)
-        return res
-
-    def sqr_inplace(self):
-        """Squares the element, and puts the result in self"""
-        _C.gt_sqr(self.pt, self.pt)
-        return self
-
-    def exp(self, scalar):
-        """Exponentiates the element with a scalar. Synonym with self ** scalar.
-
-        Example:
-            >>> G = GTGroup()
-            >>> g = G.generator()
-            >>> g ** 100 == g.exp(100) # Operator and function notation mean the same
-            True
-            >>> g ** G.order () == G.unity() # Scalar mul. by the order returns the identity element.
-            True
-        """
-        return self.__pow__(scalar)
-
-    def exp_inplace(self, scalar):
-        """ Exponentiates the element with a scalar and mutates the element to hold the result.
-        """
-        return self.__ipow__(scalar)
-
-    @force_Bn_other
-    def __pow__(self, other):
-        res = GTElem()
-        exp = other.mod(GTGroup().order())
-        _C.gt_exp(res.pt, self.pt, exp.bn)
-        return res
-
-    @force_Bn_other
-    def __ipow__(self, other):
-        _C.gt_exp(self.pt, self.pt, other.bn)
-        return self
-
-    def eq(self, other):
-        """Returns a boolean denoting whether the points are equal. Synonym with self == other.
-
-        Example:
-            >>> G = GTGroup()
-            >>> g = G.generator()
-            >>> (g ** 40) * (g ** 60) == g ** 100
-            True
-            >>> g == g ** 2
-            False
-        """
-        return self.__eq__(other)
-
-    def __eq__(self, other):
-        if not isinstance(other, GTElem):
-            return False
-
-        return _C.gt_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def is_unity(self):
-        """Returns True if this element is the unity element, otherwise False.
-
-        Example:
-            >>> G = GTGroup()
-            >>> g, o = G.generator(), G.order()
-            >>> (g ** o).is_unity()
-            True
-            >>> G.unity().is_unity()
-            True
-            >>> g.is_unity()
-            False
-        """
-        return bool(_C.gt_is_unity(self.pt))
-
-    def export(self, compressed=True):
-        """ Returns a string binary representation of the point in compressed coordinates.
-
-        Example:
-            >>> G = GTGroup()
-            >>> pt = G.generator() ** 10
-            >>> byte_string = pt.export()
-            >>> GTElem.from_binary(byte_string) == pt
-            True
-        """
-        flag = int(compressed)
-        length = _C.gt_size_bin(self.pt, flag)
-        buf = _FFI.new("char[]", length)
-        _C.gt_write_bin(buf, length, self.pt, flag)
-        return _FFI.unpack(buf, length)
-
-    def __hash__(self):
-        return self.export().__hash__()
 
     def __repr__(self):
         """ Representation of GTPoint
-
         Examples:
             >>> GTGroup().generator()
             GTElem(1368bb445c7c2d209703f239689ce34c0378a68e72a6b3b216da0e22a5031b54ddff57309396b38c881c4c849ec23e87193502b86edb8857c273fa075a50512937e0794e1e65a7617c90d8bd66065b1fffe51d7a579973b1315021ec3c19934f01b2f522473d171391125ba84dc4007cfbf2f8da752f7c74185203fcca589ac719c34dffbbaad8431dad1c1fb597aaa5018107154f25a764bd3c79937a45b84546da634b8f6be14a8061e55cceba478b23f7dacaa35c8ca78beae9624045b4b619f26337d205fb469cd6bd15c3d5a04dc88784fbb3d0b2dbdea54d43b2b73f2cbb12d58386a8703e0f948226e47ee89d06fba23eb7c5af0d9f80940ca771b6ffd5857baaf222eb95a7d2809d61bfe02e1bfd1b68ff02f0b8102ae1c2d5d5ab1a04c581234d086a9902249b64728ffd21a189e87935a954051c7cdba7b3872629a4fafc05066245cb9108f0242d0fe3ef0f41e58663bf08cf068672cbd01a7ec73baca4d72ca93544deff686bfd6df543d48eaa24afe47e1efde449383b676631)
         """
-        hx = hexlify(self.export()).decode("utf-8")
-        return "GTElem({})".format(hx)
+        pt_hex = self.to_binary().hex()
+        return "GTElem({})".format(pt_hex)

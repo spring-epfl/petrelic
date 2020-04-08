@@ -10,6 +10,7 @@ from petrelic.petlib.pairing import (
     GTElem
 )
 from petrelic.bn import Bn
+from petrelic.native.pairing import NoAffineCoordinateForECPoint
 
 import pytest
 
@@ -29,6 +30,26 @@ def test_bgp():
     assert isinstance(groups[0], G1Group)
     assert isinstance(groups[1], G2Group)
     assert isinstance(groups[2], GTGroup)
+
+
+def test_pair_type():
+    g1 = G1Group.generator()
+    g2 = G2Group.generator()
+    a = g1 * 3
+    b = g2 * 5
+    c = a.pair(b)
+
+    assert isinstance(c, GTElem)
+
+    d = g1 * 7
+    with pytest.raises(Exception):
+        a.pair(c)
+
+    with pytest.raises(Exception):
+        a.pair(d)
+
+    with pytest.raises(Exception):
+        a.pair(11)
 
 
 def test_copy(group):
@@ -304,9 +325,8 @@ def test_g1_affine_inf():
     group = G1Group()
     inf = group.infinite()
 
-    with pytest.raises(Exception) as excinfo:
+    with pytest.raises(NoAffineCoordinateForECPoint):
         inf.get_affine()
-    assert "EC Infinity" in str(excinfo.value)
 
 
 def test_ec_bin_translation(group):
