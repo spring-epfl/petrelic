@@ -81,6 +81,25 @@ class G1Element(native.G1Element):
     group = G1
 
     def pair(self, other):
+        """Pair element with another element in G2
+
+        Computes the bilinear pairing between self and another element in
+        :py:obj:`petrelic.additive.pairing.G2`.
+
+        Examples:
+             >>> g1, g2 = G1.generator(), G2.generator()
+             >>> a, b = 10, 50
+             >>> A, B = g1 * a, g2 * b
+             >>> A.pair(B) == g1.pair(g2) * (a * b)
+             True
+             >>> A.pair(g2) == g1.pair(g2 * a)
+             True
+             >>> A.pair(g2) == g1.pair(g2) * a
+             True
+        """
+        if not type(other) == G2Element:
+            raise TypeError("Second parameter should be of type G2Element is {}".format(type(other)))
+
         res = GTElement()
         _C.pc_map(res.pt, self.pt, other.pt)
         return res

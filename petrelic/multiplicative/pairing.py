@@ -185,7 +185,6 @@ class G1Element(native._G1ElementBase):
              >>> A, B = g1 ** a, g2 ** b
              >>> A.pair(B) == g1.pair(g2) ** (a * b)
              True
-
              >>> A.pair(g2) == g1.pair(g2 ** a)
              True
              >>> A.pair(g2) == g1.pair(g2) ** a
