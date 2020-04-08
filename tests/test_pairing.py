@@ -33,6 +33,26 @@ def test_bgp():
     assert isinstance(groups[2], GT)
 
 
+def test_pair_type():
+    g1 = G1.generator()
+    g2 = G2.generator()
+    a = g1 * 3
+    b = g2 * 5
+    c = a.pair(b)
+
+    assert isinstance(c, GTElement)
+
+    d = g1 * 7
+    with pytest.raises(Exception):
+        a.pair(c)
+
+    with pytest.raises(Exception):
+        a.pair(d)
+
+    with pytest.raises(Exception):
+        a.pair(11)
+
+
 def test_is_valid(group):
     assert group.generator().is_valid()
     assert (100 * group.generator()).is_valid()
@@ -321,7 +341,7 @@ def test_g1_affine_inf():
     group = G1()
     inf = group.neutral_element()
 
-    with pytest.raises(NoAffineCoordinateForECPoint) as ex:
+    with pytest.raises(NoAffineCoordinateForECPoint):
         inf.get_affine_coordinates()
 
 
