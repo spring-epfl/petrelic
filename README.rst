@@ -2,10 +2,16 @@ petrelic
 ========
 
 .. image:: https://travis-ci.org/spring-epfl/petrelic.svg?branch=master
-    :target: https://travis-ci.org/spring-epfl/petrelic
+   :target: https://travis-ci.org/spring-epfl/petrelic
+   :alt: Build status
+
+.. image:: https://readthedocs.org/projects/petrelic/badge/?version=latest
+   :target: https://petrelic.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 .. image:: https://codecov.io/gh/spring-epfl/petrelic/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/spring-epfl/petrelic
+   :target: https://codecov.io/gh/spring-epfl/petrelic
+   :alt: Test coverage
 
 ``petrelic`` is a Python wrapper around `RELIC`_. It provides a simple python interface to the BLS-381 pairing and RELIC's big number class. Our goals is to make it easy to prototype new cryptographic applications in Python using RELIC as the backend. In the future we aim to support a few other pairing curves as well.
 
