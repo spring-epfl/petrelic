@@ -110,7 +110,7 @@ typedef struct {
 	/** The third coordinate (projective representation). */
 	fp_st z;
 	/** Flag to indicate that this point is normalized. */
-	int norm;
+	int coord;
 } ep_st;
 typedef ep_st ep_t[1];
 typedef ep_st g1_st;
@@ -127,7 +127,7 @@ typedef struct {
   /** The third coordinate (projective representation). */
   fp2_t z;
   /** Flag to indicate that this point is normalized. */
-  int norm;
+  int coord;
 } ep2_st;
 typedef ep2_st ep2_t[1];
 typedef ep2_st g2_st;
