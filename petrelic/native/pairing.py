@@ -238,6 +238,8 @@ class _G1ElementBase(object):
             >>> elem.is_valid()
             True
         """
+        # Quick fix for validation issue in Relic.
+        _C.g1_norm(self.pt, self.pt)
         return bool(_C.g1_is_valid(self.pt))
 
     def is_neutral_element(self):
@@ -387,6 +389,9 @@ class _G1ElementBase(object):
         if not isinstance(other, self.__class__):
             return False
 
+        # Quick fix for equality check issue in Relic.
+        _C.g1_norm(self.pt, self.pt)
+        _C.g1_norm(other.pt, other.pt)
         return _C.g1_cmp(self.pt, other.pt) == _C.CONST_RLC_EQ
 
     def __ne__(self, other):
@@ -394,6 +399,9 @@ class _G1ElementBase(object):
         if not isinstance(other, self.__class__):
             return True
 
+        # Quick fix for equality check issue in Relic.
+        _C.g1_norm(self.pt, self.pt)
+        _C.g1_norm(other.pt, other.pt)
         return _C.g1_cmp(self.pt, other.pt) != _C.CONST_RLC_EQ
 
     #
