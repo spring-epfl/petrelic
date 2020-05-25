@@ -139,6 +139,10 @@ def test_ec_arithmetic(group):
 
     assert len(str(g)) > 0
 
+    # Bug for large factors multiplication.
+    a = 4 * group.order()
+    assert (g * a).is_neutral_element()
+
 
 def test_gt_multiplication():
     g = GT.generator()
