@@ -12,8 +12,9 @@ set -e -x
 cd /tmp
 tar xjf "/host/wheel/gmp-${GMP_VERSION}.tar.bz2"
 cd gmp-"${GMP_VERSION}"
-./configure
+./configure CFLAGS="-O3 -funroll-loops -fomit-frame-pointer -finline-small-functions -march=x86-64 -mtune=corei7"
 make
+make check
 make install
 
 # Install modern version of cmake to build relic.
