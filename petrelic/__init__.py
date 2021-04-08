@@ -1,4 +1,4 @@
-__version__ = "0.1.2"
+__version__ = "0.1.4"
 __title__ = "petrelic"
 __author__ = "Wouter Lueks"
 __email__ = "wouter.lueks@epfl.ch"

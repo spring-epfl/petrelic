@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GMP_VERSION='6.2.0'
-PETRELIC_VERSION='0.1.2'
+PETRELIC_VERSION='0.1.4'
 
 RELIC_URL='https://github.com/relic-toolkit/relic.git'
 HOST_MOUNT="/host"
@@ -12,7 +12,7 @@ set -e -x
 cd /tmp
 tar xjf "/host/wheel/gmp-${GMP_VERSION}.tar.bz2"
 cd gmp-"${GMP_VERSION}"
-./configure CFLAGS="-O3 -funroll-loops -fomit-frame-pointer -finline-small-functions -march=x86-64 -mtune=corei7"
+./configure --enable-fat CFLAGS="-O3 -funroll-loops -fomit-frame-pointer -finline-small-functions -march=x86-64 -mtune=corei7"
 make
 make check
 make install
@@ -55,7 +55,7 @@ export PATH
 
 # Build the wheel
 
-for PYTHON_VERSION in 'cp36-cp36m' 'cp37-cp37m' 'cp38-cp38'
+for PYTHON_VERSION in 'cp36-cp36m' 'cp37-cp37m' 'cp38-cp38' 'cp39-cp39'
 do
     # Set new PATH
     OLD_PATH="${PATH}"

@@ -34,7 +34,7 @@ class BilinearGroupPair:
 
 class G1Group(native.G1):
     """G1 group"""
-    
+
     @classmethod
     def _element_type(cls):
         return G1Elem
@@ -49,7 +49,7 @@ class G1Group(native.G1):
             >>> G.check_point(G.infinite())
             True
         """
-        return type(pt) == self._element_type() and pt.is_valid()
+        return type(pt) == self._element_type() and (pt.is_valid() or pt.is_infinite())
 
     @classmethod
     def infinite(cls):
@@ -147,7 +147,7 @@ class G2Group(native.G2):
             >>> G.check_point(G.infinite())
             True
         """
-        return type(pt) == self._element_type() and pt.is_valid()
+        return type(pt) == self._element_type() and (pt.is_valid() or pt.is_infinite())
 
 
     @classmethod
