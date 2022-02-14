@@ -9,7 +9,7 @@ from setuptools.dist import Distribution
 PACKAGE_NAME = "petrelic"
 SETUP_REQUIRE = ["pytest-runner", "cffi>=1.0.0"]
 TEST_REQUIRE = ["pytest"]
-INSTALL_REQUIRE = ["cffi>=1.0.0"]
+INSTALL_REQUIRE = ["cffi>=1.0.0", "msgpack>=1.0.3"]
 DEV_REQUIRE = TEST_REQUIRE + ["sphinx", "sphinx_rtd_theme", "black"]
 CFFI_MODULES = "petrelic/compile.py:_FFI"
 
@@ -58,8 +58,10 @@ setup(
         "Natural Language :: English",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Security :: Cryptography",

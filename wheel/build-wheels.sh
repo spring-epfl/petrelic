@@ -1,52 +1,51 @@
 #!/bin/bash
 
-GMP_VERSION='6.2.0'
-PETRELIC_VERSION='0.1.4'
+PETRELIC_VERSION='0.1.5'
+HOST_MOUNT='/host'
+ARCH=$(uname -m)
 
-RELIC_URL='https://github.com/relic-toolkit/relic.git'
-HOST_MOUNT="/host"
+if [[ 'x86_64' == "$ARCH" ]]
+then
+    MARCH='x86-64'
+else
+    MARCH='armv8-a'
+fi
 
 set -e -x
 
-# Install GMP
+# Prepare clean copies.
 cd /tmp
-tar xjf "/host/wheel/gmp-${GMP_VERSION}.tar.bz2"
+tar xf "${HOST_MOUNT}/wheel/gmp-${GMP_VERSION}.tar.xz"
+cp -r "${HOST_MOUNT}/wheel/relic" /tmp/relic
+cp -r "${HOST_MOUNT}" /tmp/petrelic
+
+# Build and install GMP
 cd gmp-"${GMP_VERSION}"
-./configure --enable-fat CFLAGS="-O3 -funroll-loops -fomit-frame-pointer -finline-small-functions -march=x86-64 -mtune=corei7"
+./configure --enable-fat CFLAGS="-O3 -funroll-loops -fomit-frame-pointer -finline-small-functions -march=${MARCH}"
 make
 make check
 make install
+make clean
 
-# Install modern version of cmake to build relic.
+# Install more modern version of cmake to build relic.
 OLD_PATH="${PATH}"
 PATH="/opt/python/cp37-cp37m/bin:${PATH}"
 export PATH
 
-pip install 'cmake==3.13.3'
+pip install 'cmake==3.22.2'
 
-# Build Relic
-cp -r /host/wheel/relic /tmp/relic
+# Build and install Relic
 cd /tmp/relic
 
-# Custom modifications
-sha256sum -c "${HOST_MOUNT}/wheel/sha256sum.txt"
-if [ $? -ne 0 ]
-then
-    echo "WARNING! Relic's CMakeLists.txt has changed since the patch was created." >&2
-fi
+cp "${HOST_MOUNT}/wheel/00custom_${ARCH}.sh" preset/00custom.sh
 
-patch CMakeLists.txt "${HOST_MOUNT}/wheel/CMakeLists.patch"
-if [ $? -ne 0 ]
-then
-    echo "ERROR! Patch failed to apply." >&2
-    exit 1
-fi
+mkdir build
+cd build
 
-cp "${HOST_MOUNT}/wheel/00custom.sh" preset/00custom.sh
-
-bash preset/00custom.sh -DCMAKE_INSTALL_PREFIX='/usr/local' .
+bash ../preset/00custom.sh -DCMAKE_INSTALL_PREFIX='/usr/local' ..
 make
 make install
+make clean
 
 # Python 3.7 is still used at this point.
 # Revert to initial PATH.
@@ -55,7 +54,7 @@ export PATH
 
 # Build the wheel
 
-for PYTHON_VERSION in 'cp36-cp36m' 'cp37-cp37m' 'cp38-cp38' 'cp39-cp39'
+for PYTHON_VERSION in 'cp37-cp37m' 'cp38-cp38' 'cp39-cp39' 'cp310-cp310'
 do
     # Set new PATH
     OLD_PATH="${PATH}"
@@ -73,7 +72,7 @@ do
     # Embbed libraries
     ls -l .
     ls -l dist
-    auditwheel repair dist/petrelic-${PETRELIC_VERSION}-${PYTHON_VERSION}-linux_x86_64.whl
+    auditwheel repair dist/petrelic-${PETRELIC_VERSION}-${PYTHON_VERSION}-linux_${ARCH}.whl
 
     # Restore PATH
     PATH="${OLD_PATH}"
