@@ -1,9 +1,8 @@
 Wheels Building
 ===============
 
-Petrelic is distributed as wheels with the libraries [Relic](https://github.com/relic-toolkit/relic) and [GMP](https://gmplib.org/) embedded. The wheels are build with `manylinux1` and the libraries are embedded by using auditwheel.
+Petrelic is distributed as wheels with the libraries [Relic](https://github.com/relic-toolkit/relic) and [GMP](https://gmplib.org/) embedded. The wheels are build with `manylinux2014` and the libraries are embedded by auditwheel, QEMU is used to build non-native wheels.
 
-The `manylinux1` Docker container rely on the legacy `vsyscall` API from the Linux Kernel. To ease the creation of wheels, a Vagrant configuration to build a VM with the emulation enabled is provided.
 
 Steps
 -----
@@ -22,12 +21,14 @@ Steps
     bash build.sh
 ```
 
-* The script will create a temporary directory, download the sources of the dependencies and start a `manylinux1` Docker container. Inside the container, a second script will run to compile the dependencies and build the wheels for the supported Python versions. At the end, the first script will copy the wheels into the `/host` directory they will therefore be available from the host.
+* The script will download the sources of the dependencies and start a `manylinux2014` Docker container for each supported architecture (currently x86\_64 and aarch64). Inside the container, a second script will compile the dependencies and build the wheels for the supported Python versions (currently 3.7, 3.8, 3.9, and 3.10).
 
-* Remains to logout from the vagrant VM and shut it down.
+Once the script finished building the wheels, the build script will copy the wheels to the `wheelhouse` directory on the host.
+
+* You can now logout from the vagrant VM and shut it down.
 
 ```
     vagrant halt
 ```
 
-* The wheels are contained in the `wheelhouse` directory.
+* The produced wheels will be contained in the `wheelhouse` directory.
